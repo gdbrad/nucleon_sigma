@@ -14,6 +14,20 @@ models:
     sigma: False
     delta: False
 
+  m_p:s_nlo:d_nlo:x_nlo:l_nlo:lc_t:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral  : n2lo
+    order_disc : n2lo
+    order_strange : n2lo
+    order_light : n2lo
+    xpt : True
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+
 
   proton:s_n2lo:d_n4lo:x_n2lo:l_n4lo:lc_f:sigma_t:
     particles : [proton]

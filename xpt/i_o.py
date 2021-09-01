@@ -41,7 +41,7 @@ class InputOutput(object):
         self.ensembles = ensembles
         self.project_path = project_path
 
-    def _get_bs_data(self, units=None):
+    def _get_bs_data(self, scheme=None,units=None):
         to_gvar = lambda arr : gv.gvar(arr[0], arr[1])
         #hbar_c = self.get_data_phys_point('hbarc') # MeV-fm (PDG 2019 conversion constant)
         scale_factors = gv.load(self.project_path +'/data/scale_setting.p')
@@ -50,26 +50,22 @@ class InputOutput(object):
         with h5py.File(self.project_path+'/data/input_data.h5', 'r') as f: 
             for ens in self.ensembles:
                 data[ens] = {}
-                
+                if scheme in ['w0_org','w0_imp'] and units=='phys':
+                    data[ens]['units'] = hbar_c *scale_factors[scheme+':'+ens[:3]] /scale_factors[scheme+':w0']
+                elif scheme in ['w0_org', 'w0_imp'] and units=='Fpi':
+                    data[ens]['units'] = scale_factors[scheme+':'+ens[:3]]
                 #data[ens]['units_MeV'] = hbar_c / to_gvar(f[ens]['a_fm'][scheme][:])
                 data[ens]['alpha_s'] = f[ens]['alpha_s']
                 data[ens]['L'] = f[ens]['L']
                 data[ens]['m_pi'] = f[ens]['mpi'][:]
                 data[ens]['m_k'] = f[ens]['mk'][:]
                 data[ens]['lam_chi'] = 4 *np.pi *f[ens]['Fpi'][:]
-                data[ens]['units_Fpi'] = 1/data[ens]['lam_chi']
-                if units=='Fpi':
-                    data[ens]['units'] = 1/data[ens]['lam_chi'] #for removing lam_chi dependence of fits 
+                # if units=='Fpi':
+                #     data[ens]['units'] = 1/data[ens]['lam_chi'] #for removing lam_chi dependence of fits 
                 data[ens]['eps_pi'] = data[ens]['m_pi'] / data[ens]['lam_chi']
+            
+                data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2)
 
-                # if scheme == 'w0_imp':
-                #     data[ens]['eps2_a'] = 1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2
-                # elif scheme ==  'w0_org':
-                #     data[ens]['eps2_a'] = 1 / (2 *to_gvar(f[ens]['w0a_callat']))**2
-                # elif scheme == 't0_imp':
-                #     data[ens]['eps2_a'] = 1 / (4 *to_gvar(f[ens]['t0aSq_imp']))
-                # elif scheme == 't0_org':
-                data[ens]['eps2_a'] = 1 / (4 *to_gvar(f[ens]['t0aSq']))
 
         with h5py.File(self.project_path+'/data/hyperon_data.h5', 'r') as f:
             for ens in self.ensembles:
@@ -96,11 +92,12 @@ class InputOutput(object):
 
             gv_data[ens] = gv.dataset.avg_data(gv_data[ens], bstrap=True) 
             for obs in dim1_obs:
-                gv_data[ens][obs] = gv_data[ens][obs] * bs_data[ens]['units_Fpi']
+                gv_data[ens][obs] = gv_data[ens][obs] #* bs_data[ens]['units']
                 
 
-            gv_data[ens]['eps2_a'] = bs_data[ens]['eps2_a']
-            #gv_data[ens]['eps_pi'] = bs_data[ens]['eps_pi']
+            gv_data[ens]['eps2_a'] = bs_data[ens]['eps2_a'] 
+            #
+            # gv_data[ens]['eps_pi'] = bs_data[ens]['eps_pi']
             #gv_data[ens]['m_proton_phys'] = phys_data[ens]
 
 
