@@ -64,7 +64,7 @@ class InputOutput(object):
                 #     data[ens]['units'] = 1/data[ens]['lam_chi'] #for removing lam_chi dependence of fits 
                 data[ens]['eps_pi'] = data[ens]['m_pi'] / data[ens]['lam_chi']
             
-                data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2)
+                data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2) 
 
 
         with h5py.File(self.project_path+'/data/hyperon_data.h5', 'r') as f:
@@ -79,7 +79,7 @@ class InputOutput(object):
 
 
     def get_data(self, scheme=None,units='Fpi'):
-        bs_data = self._get_bs_data(units)
+        bs_data = self._get_bs_data(scheme,units)
         phys_data = self.get_data_phys_point(param='m_proton')
 
         gv_data = {}
@@ -91,11 +91,12 @@ class InputOutput(object):
                 gv_data[ens][obs] = bs_data[ens][obs] - np.mean(bs_data[ens][obs]) + bs_data[ens][obs][0]
 
             gv_data[ens] = gv.dataset.avg_data(gv_data[ens], bstrap=True) 
-            for obs in dim1_obs:
-                gv_data[ens][obs] = gv_data[ens][obs] #* bs_data[ens]['units']
+            # for obs in dim1_obs:
+            #     gv_data[ens][obs] = gv_data[ens][obs] ##* bs_data[ens]['units']
                 
 
             gv_data[ens]['eps2_a'] = bs_data[ens]['eps2_a'] 
+            #
             #
             # gv_data[ens]['eps_pi'] = bs_data[ens]['eps_pi']
             #gv_data[ens]['m_proton_phys'] = phys_data[ens]
@@ -150,8 +151,8 @@ class InputOutput(object):
         new_prior = {}
         for key in prior:
             new_prior[key] = prior[key]
-        for key in ['m_pi', 'm_k', 'lam_chi', 'eps2_a','m_delta','eps_pi']:
-            new_prior[key] = data[key]
+        for key in ['m_pi', 'm_k', 'eps2_a','m_delta','eps_pi']:#,'lam_chi', ]:
+            new_prior[key] = data[key] /data['lam_chi']
         return new_prior
 
 

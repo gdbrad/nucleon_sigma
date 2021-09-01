@@ -172,7 +172,7 @@ class Proton(lsqfit.MultiFitterModel):
         elif self.model_info['fit_fpi_units']:
             xdata['eps_pi'] = p['eps_pi']
 
-        xdata['eps_delta'] = (p['m_{delta,0}'] - p['m_{proton,0}']) / p['lam_chi']
+        xdata['eps_delta'] = (p['m_{delta,0}'] - p['m_{proton,0}']) / p['lam_chi']**2
         xdata['eps2_a'] = p['eps2_a'] / p['lam_chi']
         #xdata['d_eps2_s'] = (2 *p['m_k']**2 - p['m_pi']**2) / p['lam_chi']**2 - 0.3513
         xdata['d_eps2_s'] = (2 *p['m_k']**2 - p['m_pi']**2) / p['lam_chi']**3 #- 0.3513
@@ -210,13 +210,13 @@ class Proton(lsqfit.MultiFitterModel):
         elif self.model_info['fit_fpi_units']: # lam_chi dependence OFF #
             if self.model_info['order_disc']    in  ['lo', 'nlo', 'n2lo']:
                 output += p['m_{proton,0}'] * (p['d_{proton,a}'] * xdata['eps2_a'])
-        
+                #output += (p['d_{proton,a}'] * xdata['eps2_a'])
             if self.model_info['order_light']   in ['lo', 'nlo', 'n2lo']:
                 output+= p['b_{proton,2}'] * xdata['eps_pi']**2
 
             if self.model_info['order_strange'] in ['lo', 'nlo', 'n2lo']:
                 output+= p['m_{proton,0}']*   (p['d_{proton,s}'] * xdata['d_eps2_s'])
-                #output+= p['m_{proton,0}']*   (p['d_{proton,s}'])
+                #output += (p['d_{proton,s}'] * xdata['d_eps2_s'])
 
 
         return output
@@ -244,7 +244,7 @@ class Proton(lsqfit.MultiFitterModel):
                     output += -3*np.pi/2 * xdata['eps_pi']**3
 
 
-        if self.model_info['xpt'] is False:
+        elif self.model_info['xpt'] is False:
             return 0
         
         return output
@@ -291,15 +291,16 @@ class Proton(lsqfit.MultiFitterModel):
             if self.model_info['order_strange'] in ['n2lo']:  
                 output += p['m_{proton,0}']*(
                 p['d_{proton,as}']* xdata['eps2_a'] * xdata['d_eps2_s'] +
-                (p['d_{proton,ls}'] * xdata['d_eps2_s'] * xdata['eps_pi']**2) + (p['d_{proton,ss}'] * xdata['d_eps2_s']**2)
+                p['d_{proton,ls}'] * xdata['d_eps2_s'] * xdata['eps_pi']**2 + p['d_{proton,ss}'] * xdata['d_eps2_s']**2
             )
+            
             if self.model_info['order_disc'] in ['n2lo']:
                 output += p['m_{proton,0}']*( 
                 (p['d_{proton,al}'] * xdata['eps2_a'] * xdata['eps_pi']**2) 
                 + (p['d_{proton,aa}'] * xdata['eps2_a']**2))
 
             if self.model_info['order_light'] in ['n2lo']:
-                output += p['m_{proton,0}'] * (p['b_{proton,4}']*xdata['eps_pi']**4)
+                output += p['m_{proton,0}']*(p['b_{proton,4}']*xdata['eps_pi']**4)
                 
             if self.model_info['order_chiral'] in ['n2lo']:
                 output+= p['a_{proton,4}'] * xdata['eps_pi']**4 * np.log(xdata['eps_pi']**2)
@@ -309,14 +310,25 @@ class Proton(lsqfit.MultiFitterModel):
 
     def fitfcn_n4lo(self,p,xdata):
         output = 0
-        if self.model_info['order_light'] in ['n4lo']:
-            output += xdata['lam_chi'] * (
-            + xdata['eps_pi']**6 *p['b_{proton,6}'])
-        if self.model_info['order_disc'] in ['n4lo']:
-            output += xdata['lam_chi'] * (
-            + p['d_{proton,all}'] * xdata['eps2_a'] * xdata['eps_pi']**4
-            + p['d_{proton,aal}'] * xdata['eps2_a']**2 * xdata['eps_pi']**2
-            + p['d_{proton,aal}'] * xdata['eps2_a']**3)
+        if self.model_info['fit_phys_units']:
+            if self.model_info['order_light'] in ['n4lo']:
+                output += xdata['lam_chi'] * (
+                + xdata['eps_pi']**6 *p['b_{proton,6}'])
+            if self.model_info['order_disc'] in ['n4lo']:
+                output += xdata['lam_chi'] * (
+                + p['d_{proton,all}'] * xdata['eps2_a'] * xdata['eps_pi']**4
+                + p['d_{proton,aal}'] * xdata['eps2_a']**2 * xdata['eps_pi']**2
+                + p['d_{proton,aal}'] * xdata['eps2_a']**3)
+
+        elif self.model_info['fit_fpi_units']:
+            if self.model_info['order_light'] in ['n4lo']:
+                output += xdata['eps_pi']**6 *p['b_{proton,6}']
+            if self.model_info['order_disc'] in ['n4lo']:
+                output += (
+                + p['d_{proton,all}'] * xdata['eps2_a'] * xdata['eps_pi']**4
+                + p['d_{proton,aal}'] * xdata['eps2_a']**2 * xdata['eps_pi']**2
+                + p['d_{proton,aal}'] * xdata['eps2_a']**3)
+
         return output
 
 # expansion of nucleon mass derivative for term in analytic sigma term #
