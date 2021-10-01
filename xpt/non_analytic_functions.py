@@ -75,9 +75,9 @@ def fcn_F(eps_pi, eps_delta):
     output = (
         - eps_delta *(eps_delta**2 - eps_pi**2) *fcn_R((eps_pi/eps_delta)**2)
         - (3/2) *eps_pi**2 *eps_delta *np.log(eps_pi**2)
-        - eps_delta**3 *np.log(4 *(eps_delta/eps_pi)**2)
+        - eps_delta**3 *np.log(4 *(eps_delta/eps_pi)**2) 
     )
-    return output
+    return output 
 
 def fcn_dF(eps_pi, eps_delta):
     output = 0

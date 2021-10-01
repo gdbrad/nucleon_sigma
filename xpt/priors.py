@@ -3,21 +3,24 @@ import gvar as gv
 prior = {}
 # not-even leading order 
 
-prior['m_{proton,0}'] = gv.gvar(1,1)
+prior['m_{proton,0}'] = gv.gvar(0.9,.4)
 prior['m_{delta,0}'] = gv.gvar(2,1)
 
-prior['g_{proton,delta}'] = gv.gvar(0.91,5)
+prior['g_{proton,delta}'] = gv.gvar(1.48,5)
 prior['g_{proton,proton}'] = gv.gvar(1.27,5)
-prior['g_{delta,delta}'] = gv.gvar(0.59,5)
+prior['g_{delta,delta}'] = gv.gvar(-2.2,5)
 
-# n2lo
+prior['l4_bar'] = gv.gvar(4.73,3)
+prior['F0'] = gv.gvar(90,50)
+#prior['c0'] = gv.gvar()
+
 
 prior['a_{proton,4}'] = gv.gvar(0, 5)
 prior['a_{proton,6}'] = gv.gvar(0, 5)
-prior['b_{proton,4}'] = gv.gvar(0,5)
-prior['b_{proton,6}'] = gv.gvar(0,5)
-prior['b_{proton,2}'] = gv.gvar(0, 5)
-prior['g_{proton,4}'] = gv.gvar(0,5)
+prior['b_{proton,4}'] = gv.gvar(0,2)
+prior['b_{proton,6}'] = gv.gvar(0,2)
+prior['b_{proton,2}'] = gv.gvar(2,2)
+prior['g_{proton,4}'] = gv.gvar(0,2)
 prior['g_{proton,6}'] = gv.gvar(0,5)
 prior['d_{proton,a}'] = gv.gvar(0,5)
 prior['d_{proton,s}'] = gv.gvar(0,5)

@@ -249,9 +249,7 @@ class fit_analysis(object):
         extrapolated_mass = {}
         for particle in self.model_info['particles']:
             extrapolated_mass[particle] = self.fitfcn(p=self.posterior, data=self.phys_point_data, particle=particle)
-        print(extrapolated_mass)
         return extrapolated_mass
-
 
     @property
     def fit_keys(self):
@@ -316,51 +314,66 @@ class fit_analysis(object):
     def hyp_mass(self):
         return self.fitfcn(data=self.phys_point_data.copy())
 
-    def _extrapolate_to_ens(self, ens=None, phys_params=None):
+    def _extrapolate_to_ens(self,data=None, phys_params=None):
         if phys_params is None:
             phys_params = []
 
         extrapolated_values = {}
-        for j, ens_j in enumerate(self.ensembles):
-            posterior = {}
-            xdata = {}
-            if ens is None or (ens is not None and ens_j == ens):
-                for param in self.fitter.fit.p:
-                    shape = self.fitter.fit.p[param].shape
-                    if param in phys_params:
-                        posterior[param] = self.phys_point_data[param] / self.phys_point_data['hbarc']
-                    elif shape == ():
-                        posterior[param] = self.fitter.fit.p[param]
-                    else:
-                        posterior[param] = self.fitter.fit.p[param][j]
-
-                if 'alpha_s' in phys_params:
-                    posterior['alpha_s'] = self.phys_point_data['alpha_s']
-
-                if 'eps_pi' in phys_params:
-                    xdata['eps_pi'] = self.phys_point_data['m_pi'] / self.phys_point_data['lam_chi']
-                if 'd_eps2_s' in phys_params:
-                    xdata['d_eps2_s'] = (2 *self.phys_point_data['m_k']**2 - self.phys_point_data['m_pi']**2)/ self.phys_point_data['lam_chi']**2
-                if 'eps_a' in phys_params:
-                    xdata['eps_a'] = 0
-
-                if ens is not None:
-                    return self.fitfcn(p=posterior, data={}, particle=None)
-                else:
-                    extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
-
-                
-            extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
-        return extrapolated_values
-
-    def fitfcn(self, p, data=None, particle=None):
-        output = {}
+        # for j, ens_j in enumerate(self.ensembles):
+        posterior = {}
+        xdata = {}
         # if p is None:
-        #     p = self.posterior
+        #     p = {}
+        #     p.update(self.posterior)
+        if data is None:
+            data = self.phys_point_data
+            
+        posterior.update(data)
+        # if ens is None or (ens is not None and ens_j == ens):
+        for param in self.fitter.fit.p:
+            print(param)
+            shape = self.fitter.fit.p[param].shape
+            print(shape)
+            if param in phys_params:
+                posterior[param] = self.phys_point_data[param] / self.phys_point_data['hbarc']
+            elif shape == ():
+                posterior[param] = self.fitter.fit.p[param]
+            else:
+                posterior[param] = self.fitter.fit.p[param]
+
+        if 'alpha_s' in phys_params:
+            posterior['alpha_s'] = self.phys_point_data['alpha_s']
+
+        if 'eps_pi' in phys_params:
+            xdata['eps_pi'] = self.phys_point_data['m_pi'] / self.phys_point_data['lam_chi']
+        if 'd_eps2_s' in phys_params:
+            xdata['d_eps2_s'] = (2 *self.phys_point_data['m_k']**2 - self.phys_point_data['m_pi']**2)/ self.phys_point_data['lam_chi']**2
+        if 'eps_a' in phys_params:
+            xdata['eps_a'] = 0
+
+        # if ens is not None:
+        return self.fitfcn(p=posterior, data={}, particle=None)
+        # else:
+        #     extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
+
+            
+        # extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
+        #return extrapolated_values
+
+    def fitfcn(self, p=None, data=None, particle=None):
+        output = {}
+        if p is None:
+            p = {}
+            p.update(self.posterior)
+        if data is None:
+            data = self.phys_point_data
+            
+        p.update(data)
+        #print(p)
 
         for mdl in self.fitter._make_models():
             part = mdl.datatag
-            output[part] = mdl.fitfcn(p,data)
+            output[part] = mdl.fitfcn(p)
 
         if particle is None:
             return output
@@ -382,3 +395,6 @@ class fit_analysis(object):
                     return value_shifted[ens_j]
 
         return value_shifted
+
+    # def plot_eps(self,ens=None, show_band=None):
+        

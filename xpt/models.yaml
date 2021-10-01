@@ -1,17 +1,184 @@
 models:
 
-  m_p:s_n4lo:d_n4lo:x_n4lo:l_n4lo:fpi:
+  eps_p:taylor:l_lo:
     particles : [proton]
     eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n2lo
-    order_strange : n2lo
+    order_chiral : Null    
+    order_disc : Null
+    order_strange : Null
+    order_light : lo
+    xpt : False
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
+  eps_p:taylor:l_n2lo:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral : Null    
+    order_disc : Null
+    order_strange : Null
     order_light : n2lo
     xpt : False
     fv : True
     fit_phys_units: False
     fit_fpi_units : True
     sigma: False
+    delta: False
+    axial: True
+
+  eps_p:taylor:l_n2lo:x_lo:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral : lo    
+    order_disc : Null
+    order_strange : Null
+    order_light : n2lo
+    xpt : False
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
+  eps_p:taylor:l_lo:x_lo:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral : lo    
+    order_disc : Null
+    order_strange : Null
+    order_light : lo
+    xpt : True
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
+  eps_p:taylor:l_n4lo:d_lo:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral : Null    
+    order_disc : lo
+    order_strange : Null
+    order_light : n4lo
+    xpt : True
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
+  eps_p:taylor:l_n4lo:d_lo:sigma_pi:
+    particles : [sigma_pi_n]
+    eps2a_defn : w0_imp
+    order_chiral : Null    
+    order_disc : lo
+    order_strange : Null
+    order_light : n4lo
+    xpt : True
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: True
+    delta: False
+    axial: True
+
+  eps_p:l_n2lo:xpt_lo:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral : lo    
+    order_disc : None
+    order_strange : None
+    order_light : n2lo
+    xpt : True
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
+  fpi:l_lo:
+    particles : [Fpi]
+    eps2a_defn : w0_imp
+    order_chiral : Null    
+    order_disc : Null
+    order_strange : Null
+    order_light : lo
+    xpt : False
+    fv : Null
+    fit_phys_units: True
+    fit_fpi_units : False
+    sigma: Null
+    delta: Null
+    axial: Null
+  
+  
+  eps_p:taylor:l_n4lo:s_n4lo:d_lo:
+      particles : [proton]
+      eps2a_defn : w0_imp
+      order_chiral : None    
+      order_disc : lo
+      order_strange : n4lo
+      order_light : n4lo
+      xpt : False
+      fv : True
+      fit_phys_units: False
+      fit_fpi_units : True
+      sigma: False
+      delta: False
+      axial: True
+
+
+  eps_p:s_n4lo:d_n4lo:x_n4lo:l_n4lo:fpi:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral  : n2lo
+    order_disc : lo
+    order_strange : n2lo
+    order_light : n4lo
+    xpt : False
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
+  eps_p:s_n4lo:d_n4lo:x_n4lo:l_n4lo:fpi:sigma:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral  : n2lo
+    order_disc : lo
+    order_strange : n2lo
+    order_light : n4lo
+    xpt : False
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: True
+    delta: False
+    axial: True
+
+  m_p:s_n4lo:d_n4lo:x_n4lo:l_n4lo:fpi:sigma:
+    particles : [proton]
+    eps2a_defn : w0_imp
+    order_chiral  : n2lo
+    order_disc : n2lo
+    order_strange : n2lo
+    order_light : n2lo
+    xpt : True
+    fv : True
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: True
     delta: True
     axial: True
 
@@ -31,123 +198,7 @@ models:
     axial: True
 
 
-  proton:s_n2lo:d_n4lo:x_n2lo:l_n4lo:lc_f:sigma_t:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n4lo
-    order_strange : n2lo
-    order_light : n4lo
-    xpt : True
-    fv : True
-    lam_chi: False
-    sigma: True
-
-  proton:s_n2lo:d_n4lo:x_n2lo:l_n4lo:lc_f:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n4lo
-    order_strange : n2lo
-    order_light : n4lo
-    xpt : True
-    fv : True
-    lam_chi: False
-    sigma: False
-
   
-
-
-  proton:s_n2lo:d_n2lo:x_n2lo:l_n2lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n2lo
-    order_strange : n2lo
-    order_light : n2lo
-    xpt : True
-    fv : True
-    lam_chi: False
-
-  proton:s_n2lo:d_n2lo:x_nlo:l_n2lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : n2lo
-    order_strange : n2lo
-    order_light : n2lo
-    xpt : True
-    fv : True
-
-  proton:s_n2lo:d_nlo:x_nlo:l_n2lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : n2lo
-    order_light : n2lo
-    xpt : True
-    fv : True
-
-  proton:s_n2lo:d_nlo:x_nlo:l_nlo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : n2lo
-    order_light : nlo
-    xpt : True
-    fv : True
-
-  proton:s_nlo:d_nlo:x_nlo:l_nlo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : nlo
-    order_light : nlo
-    xpt : True
-    fv : True
-
-  proton:s_nlo:d_nlo:x_nlo:l_lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : nlo
-    order_light : lo
-    xpt : True
-    fv : True
-
-  proton:s_nlo:d_nlo:x_lo:l_lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : nlo
-    order_strange : nlo
-    order_light : lo
-    xpt : True
-    fv : True
-
-  proton:s_nlo:d_lo:x_lo:l_lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : lo
-    order_strange : nlo
-    order_light : lo
-    xpt : True
-    fv : True
-
-  proton:s_lo:d_lo:x_lo:l_lo:
-    particles : [proton]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : lo
-    order_strange : lo
-    order_light : lo
-    xpt : True
-    fv : True
 
   
 
@@ -156,194 +207,7 @@ models:
 
   
 
-  xi:xi_st:s_n2lo:d_n2lo:x_n2lo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n2lo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  xi:xi_st:s_n2lo:d_n2lo:x_nlo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : n2lo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  xi:xi_st:s_n2lo:d_nlo:x_nlo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  xi:xi_st:s_nlo:d_nlo:x_nlo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  xi:xi_st:s_nlo:d_lo:x_nlo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : lo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  xi:xi_st:s_lo:d_lo:x_nlo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : lo
-    order_strange : lo
-    xpt : True
-    fv : True
-
-  xi:xi_st:s_lo:d_lo:x_lo:
-    particles : [xi, xi_st]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : lo
-    order_strange : lo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_n2lo:d_n2lo:x_n2lo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n2lo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_n2lo:d_n2lo:x_nlo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : n2lo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_n2lo:d_nlo:x_nlo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_nlo:d_nlo:x_nlo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_nlo:d_nlo:x_lo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : nlo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_nlo:d_lo:x_lo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : lo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  lam:sigma:sigma_st:s_lo:d_lo:x_lo:
-    particles : [lam, sigma, sigma_st]
-    eps2a_defn : w0_imp
-    order_chiral  : lo
-    order_disc : lo
-    order_strange : lo
-    xpt : True
-    fv : True
-
-  omega:s_n2lo:d_n2lo:x_n2lo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral  : n2lo
-    order_disc : n2lo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  omega:s_n2lo:d_n2lo:x_nlo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : n2lo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  omega:s_n2lo:d_nlo:x_nlo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : n2lo
-    xpt : True
-    fv : True
-
-  omega:s_nlo:d_nlo:x_nlo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral  : nlo
-    order_disc : nlo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  omega:s_nlo:d_nlo:x_lo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral : lo
-    order_disc : nlo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  omega:s_nlo:d_lo:x_lo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral : lo
-    order_disc : lo
-    order_strange : nlo
-    xpt : True
-    fv : True
-
-  omega:s_lo:d_lo:x_lo:
-    particles : omega
-    eps2a_defn : w0_imp
-    order_chiral : lo
-    order_disc : lo
-    order_strange : lo
-    xpt : True
-    fv : True
+  
 
 
 
