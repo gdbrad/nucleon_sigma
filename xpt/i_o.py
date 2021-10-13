@@ -49,9 +49,7 @@ class InputOutput(object):
                 data[ens]['m_pi'] = f[ens]['mpi'][1:]
                 data[ens]['m_k'] = f[ens]['mk'][1:]
                 data[ens]['lam_chi'] = 4 *np.pi *f[ens]['Fpi'][1:]
-                data[ens]['eps_Fpi'] = f[ens]['Fpi'][1:]
-                
-
+                data[ens]['Fpi'] = f[ens]['Fpi'][1:]
                 
                 # if units=='Fpi':
                 #     data[ens]['units'] = 1/data[ens]['lam_chi'] #for removing lam_chi dependence of fits 
@@ -79,7 +77,7 @@ class InputOutput(object):
 
         gv_data = {}
         
-        dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','eps_Fpi']
+        dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi']
         for ens in self.ensembles:
             gv_data[ens] = {}
             for obs in dim1_obs:

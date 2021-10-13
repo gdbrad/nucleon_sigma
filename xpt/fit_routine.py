@@ -34,7 +34,6 @@ class fit_routine(object):
             data = self.y
             fitter = lsqfit.MultiFitter(models=models)
             fit = fitter.lsqfit(data=data, prior=prior, fast=False, mopt=False)
-            
             self._fit = fit
 
         return self._fit 
@@ -187,7 +186,12 @@ class fit_routine(object):
             output['proton']['n4lo']['light'  ] = ['b_{proton,6}']
             output['proton']['n4lo']['xpt'    ] = []
 
-            output['Fpi']['lo']['light'] = ['F0', 'l4_bar']
+            output['Fpi']['lo']['light']    = ['F0','l4_bar']
+            output['Fpi']['lo']['disc']     = ['d_{fpi,a}']
+            output['Fpi']['lo']['xpt']      = ['l4_bar']
+            output['Fpi']['n2lo']['light']  = ['d_{fpi,ll}','b_{fpi,4}']
+            output['Fpi']['n2lo']['disc']   = ['d_{fpi,aa}','d_{fpi,al}']
+            output['Fpi']['n2lo']['xpt']    = [ 'a_{fpi,4}','l4_bar']
 
             output['delta']['llo' ]['light'  ] = ['m_{delta,0}']
             output['delta']['lo'  ]['disc'   ] = ['d_{delta,a}']
@@ -552,7 +556,7 @@ class Sigma_pi_N(lsqfit.MultiFitterModel):
             + (p['d_{proton,aa}'] * xdata['eps2_a']**2))
 
         if self.model_info['order_light'] in ['n2lo']:
-            output += p['m_{proton,0}'] * (p['b_{proton,4}']* xdata['eps_pi'] * (4* xdata['lam_chi']*xdata['eps_pi']**3))
+            output += p['m_{proton,0}'] * (p['b_{proton,4}']*   (4* xdata['lam_chi']*xdata['eps_pi']**3))
             
         # if self.model_info['order_chiral'] in ['n2lo']:
         #     output+= p['g_{proton,4}'] * xdata['eps_pi']* (2*xdata['eps_pi'] * xdata['lam_chi'] * naf.fcn_dJ(xdata['eps_pi'],xdata['eps_delta'])
@@ -572,6 +576,7 @@ class Sigma_pi_N(lsqfit.MultiFitterModel):
     def builddata(self, data):
         return data[self.datatag]
 
+## have to fit LO, n2lo for FPI ## 
 
 class Fpi(lsqfit.MultiFitterModel):
     def __init__(self, datatag, model_info):
@@ -585,8 +590,6 @@ class Fpi(lsqfit.MultiFitterModel):
             xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
         elif self.model_info['fit_fpi_units']:
             xdata['eps_pi'] = p['eps_pi']
-        
-        #
         # xdata['eps_delta'] = (p['m_{delta,0}'] - p['m_{proton,0}']) / p['lam_chi']
         if self.model_info['order_disc'] is not None:
             xdata['eps2_a'] = p['eps2_a']
@@ -594,34 +597,60 @@ class Fpi(lsqfit.MultiFitterModel):
         if self.model_info['order_strange'] is not None:
             xdata['d_eps2_s'] = (2 *p['m_k']**2 - p['m_pi']**2) / p['lam_chi']**2 - 0.3513
 
+        # USING BARYON POWER COUNTING FOR ORDERING #
         output = 0
-        #elif self.model_info['sigma'] is False:
-            #output += self.fitfcn_llo(p,xdata)
         output +=  p['F0']
         output += self.fitfcn_lo(p,xdata) 
-        # output += self.fitfcn_nlo_xpt(p,xdata) 
-        # output += self.fitfcn_n2lo(p,xdata)
-        # output += self.fitfcn_n2lo_xpt(p,xdata)
-        # output += self.fitfcn_n4lo(p,xdata)
+        output += self.fitfcn_nlo_xpt(p,xdata)
+        output += self.fitfcn_n2lo(p,xdata)
+        output += self.fitfcn_n2lo_xpt(p,xdata)
+        
         return output
 
     #F_pi = F_0 ( 1 + eps_pi^2 ( -log(eps_pi^2) + l_4 ) )
 
     def fitfcn_lo(self,p,xdata):
-         
         output = 0
-        if self.model_info['order_light'] in ['lo']:
-            output+= p['F0']*xdata['eps_pi']**2*(p['l4_bar']) #* (-np.log(xdata['eps_pi']**2)+p['l4_bar']))
+        if self.model_info['order_light'] in ['lo','n2lo']:
+            if self.model_info['xpt_fpi']:
+                output+= p['F0']*xdata['eps_pi']**2*(p['l4_bar']) * (-np.log(xdata['eps_pi']**2))
+            else:
+                output +=p['F0']*xdata['eps_pi']**2*(p['l4_bar'])
+
+        if self.model_info['order_disc'] in ['lo','n2lo']:
+            output += p['F0'] * (p['d_{fpi,a}']  * xdata['eps_pi']**2)
 
         return output
 
-    def fitfcn_nlo(self,p,x_data):
-        
+    def fitfcn_nlo_xpt(self,p,xdata):
+        output = 0
+        if self.model_info['xpt_fpi']:
+            output -= 1/4*p['F0']*xdata['eps_pi']**4*(np.log(xdata['eps_pi']**2))
+        else:
+            return 0
+        return output
 
     def fitfcn_n2lo(self,p,xdata):
         output = 0
-        if self.model_info['xpt']:
-            output += 
+    
+        if self.model_info['order_light'] in ['n2lo']:
+            output += p['F0']*(p['d_{fpi,ll}'] *p['b_{fpi,4}']* xdata['eps_pi']**2)
+
+        if self.model_info['order_disc'] in ['n2lo']:
+            output += p['F0']*( 
+            (p['d_{fpi,al}'] * xdata['eps2_a'] * xdata['eps_pi']**2) 
+            + (p['d_{fpi,aa}'] * xdata['eps2_a']**2))
+        return output
+
+    def fitfcn_n2lo_xpt(self,p,xdata):
+        output = 0
+
+        if self.model_info['xpt_fpi']:
+            output += xdata['eps_pi']**4 * np.log(xdata['eps_pi']**2)*(-p['F0']*p['a_{fpi,4}'] - 2*p['F0']*p['l4_bar'])
+            - xdata['eps_pi']**4*(p['F0'])
+
+        else:
+            return 0
 
     def buildprior(self, prior, mopt=False, extend=False):
         return prior
