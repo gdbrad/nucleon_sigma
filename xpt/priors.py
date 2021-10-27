@@ -10,8 +10,12 @@ prior['g_{proton,delta}'] = gv.gvar(1.48,5)
 prior['g_{proton,proton}'] = gv.gvar(1.27,5)
 prior['g_{delta,delta}'] = gv.gvar(-2.2,5)
 
+#FPi FIT#
 prior['l4_bar'] = gv.gvar(4.73,3)
 prior['F0']         = gv.gvar(90,50)
+prior['c_2F'] = gv.gvar(0,100)
+prior['c_1F'] = gv.gvar(0,100)
+
 prior['d_{fpi,a}']  = gv.gvar(0,4)
 prior['d_{fpi,ll}'] = gv.gvar(0,4)
 prior['d_{fpi,al}'] = gv.gvar(0,4)

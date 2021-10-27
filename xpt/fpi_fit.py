@@ -20,8 +20,6 @@ class fit_routine(object):
         self._simultaneous = False
         self._posterior = None
         self.y = {datatag : self.data[datatag] for datatag in self.model_info['particles']}
-        #self.y = {datatag : self.data['eps_'+datatag] for datatag in self.model_info['particles']}
-        #need to save self.y to generate fit , correlated with self.y
     def __str__(self):
         return str(self.fit)
     
@@ -36,17 +34,6 @@ class fit_routine(object):
             self._fit = fit
 
         return self._fit 
-    # @property
-    # def extrapolate(self):
-    #     if self._extrapolate is None:
-    #         extrapolate = self.extrapolation
-    #         self._extrapolate = extrapolate
-    #     return self._extrapolate
-
-    # @property
-    # def extrapolation(self):
-    #     extrapolation = Proton(datatag='proton',model_info=self.model_info).extrapolate_mass(observable='sigma_pi_n')
-    #     return extrapolation
 
     def _make_models(self, model_info=None):
         if model_info is None:
@@ -85,8 +72,8 @@ class fit_routine(object):
                     orders = ['llo', 'lo', 'nlo']
                 elif value == 'n2lo':
                     orders = ['llo', 'lo', 'nlo','n2lo']
-                elif value == 'n4lo':
-                    orders = ['llo', 'lo', 'nlo','n2lo', 'n4lo']
+                # elif value == 'n4lo':
+                #     orders = ['llo', 'lo', 'nlo','n2lo', 'n4lo']
                 else:
                     orders = []
                 for o in orders:
@@ -103,10 +90,10 @@ class fit_routine(object):
             new_prior['eps2_a'] = data['eps2_a']
             #new_prior['m_pi'] = data['m_pi']
             #new_prior['lam_chi'] = data['lam_chi']
-        # if self.model_info['order_disc'] is not None:
-        #     #new_prior['eps2_a'] = data['eps2_a']
-        #     #new_prior['m_pi'] = data['m_pi']
-        #     new_prior['lam_chi'] = data['lam_chi']
+        if self.model_info['order_disc'] is not None:
+            new_prior['eps2_a'] = data['eps2_a']
+            #new_prior['m_pi'] = data['m_pi']
+            #new_prior['lam_chi'] = data['lam_chi']
 
 
         # for key in ['eps2_a','lam_chi','m_pi','eps_pi']: 
@@ -145,10 +132,10 @@ class fit_routine(object):
 
             output['Fpi']['lo']['light']    = ['F0','l4_bar']
             output['Fpi']['lo']['disc']     = ['d_{fpi,a}']
-            output['Fpi']['lo']['xpt']      = ['l4_bar']
-            output['Fpi']['n2lo']['light']  = ['d_{fpi,ll}','b_{fpi,4}']
+            output['Fpi']['nlo']['xpt']      = ['l4_bar','c_1F','c_2F']
+            output['Fpi']['n2lo']['light']  = ['d_{fpi,ll}','b_{fpi,4}','c_1F','c_2F']
             output['Fpi']['n2lo']['disc']   = ['d_{fpi,aa}','d_{fpi,al}']
-            output['Fpi']['n2lo']['xpt']    = ['a_{fpi,4}','l4_bar']
+            output['Fpi']['n2lo']['xpt']    = ['a_{fpi,4}','l4_bar','c_2F','c_1F']
 
             if lec_type in output[particle][order]:
                 return output[particle][order][lec_type]
@@ -169,7 +156,7 @@ class Fpi(lsqfit.MultiFitterModel):
             xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
         elif self.model_info['fit_fpi_units']:
             xdata['eps_pi'] = p['eps_pi']
-        # xdata['eps_delta'] = (p['m_{delta,0}'] - p['m_{proton,0}']) / p['lam_chi']
+
         if self.model_info['order_disc'] is not None:
             xdata['eps2_a'] = p['eps2_a']
 
@@ -180,62 +167,69 @@ class Fpi(lsqfit.MultiFitterModel):
         output = 0
         output +=  p['F0']
         output += self.fitfcn_lo(p,xdata) 
-        output += self.fitfcn_nlo_xpt(p,xdata)
+        #output += self.fitfcn_nlo_xpt(p,xdata)
         output += self.fitfcn_n2lo(p,xdata)
-        output += self.fitfcn_n2lo_xpt(p,xdata)
+        #output += self.fitfcn_n2lo_xpt(p,xdata)
         
         return output
-
-    #F_pi = F_0 ( 1 + eps_pi^2 ( -log(eps_pi^2) + l_4 ) )
 
     def fitfcn_lo(self,p,xdata):
         output = 0
         if self.model_info['order_light'] in ['lo','n2lo']:
             #if self.model_info['xpt_fpi']:
-                output+= p['F0']*
-                (xdata['eps_pi']**2*p['l4_bar']) 
-                + (xdata['eps_pi']**2*np.log(xdata['eps_pi']**2)*p['F0'])
-            # else:
-            #     output +=p['F0']*xdata['eps_pi']**2*(p['l4_bar'])
-
+                output+= p['F0']*(xdata['eps_pi']**2*(-np.log(xdata['eps_pi']**2)+p['l4_bar']))
+    
         if self.model_info['order_disc'] in ['lo','n2lo']:
-            output += p['F0'] * (p['d_{fpi,a}']  * xdata['eps2_a']**2)
+            output += p['F0'] * (p['d_{fpi,a}']  * xdata['eps2_a'])
 
         return output
 
     def fitfcn_nlo_xpt(self,p,xdata):
         output = 0
-        if self.model_info['xpt_fpi']:
-            output -= 1/4*p['F0']*xdata['eps_pi']**4*(np.log(xdata['eps_pi']**2))
+        if self.model_info['order_chiral'] in ['nlo']:
+            output += p['F0']*(-xdata['eps_pi']**2*(-np.log(xdata['eps_pi']**2)+p['l4_bar']))
         else:
             return 0
         return output
+
+    def fitfcn_n2lo_xpt(self,p,xdata):
+        output = 0
+        if self.model_info['xpt_fpi']:
+            output += p['F0']*((xdata['eps_pi']**4 * 5/4 * np.log(xdata['eps_pi']**2)**2) 
+            + (p['c_1F'] + 2)*np.log(xdata['eps_pi']**2) + p['c_2F'] - 2*p['l4_bar'])
 
     def fitfcn_n2lo(self,p,xdata):
         output = 0
     
         if self.model_info['order_light'] in ['n2lo']:
-            output += -1/4*p['F0']* xdata['eps_pi']**4 * np.log(xdata['eps_pi']**2)**2
+            output += p['F0']*(-1/4*xdata['eps_pi']**4*(np.log(xdata['eps_pi']**2)**2)+
+            (xdata['eps_pi']**4 * 5/4 * np.log(xdata['eps_pi']**2)**2) 
+            + (p['c_1F'] + 2)*np.log(xdata['eps_pi']**2) + p['c_2F'] - 2*p['l4_bar'])
             
 
         if self.model_info['order_disc'] in ['n2lo']:
             output += p['F0']*( 
-            p['d_{fpi,ll}'] * xdata['eps_pi']**2
-            +p['d_{fpi,al}'] * xdata['eps2_a'] * xdata['eps_pi']**2 
-            +p['d_{fpi,aa}'] * xdata['eps2_a']**2
+            (p['d_{fpi,al}'] * xdata['eps2_a'] * xdata['eps_pi']**2) 
+            +(p['d_{fpi,aa}'] * xdata['eps2_a']**2)
             )
+
+        if self.model_info['order_chiral'] in ['n2lo']:
+            output += (np.log(xdata['eps_pi']**2)**2)
+        * 5/4 * np.log(xdata['eps_pi']**2)**2) 
+            + (p['c_1F'] + 2)*np.log(xdata['eps_pi']**2) + p['c_2F'] - 2*p['l4_bar'])
+
         return output
 
-    def fitfcn_n2lo_xpt(self,p,xdata):
-        output = 0
+    # def fitfcn_n2lo_xpt(self,p,xdata):
+    #     output = 0
 
-        if self.model_info['xpt_fpi']:
-            output += xdata['eps_pi']**4 * np.log(xdata['eps_pi']**2)*(-p['F0']*p['a_{fpi,4}'] 
-            - 2*p['F0']*p['l4_bar'])
-            - xdata['eps_pi']**4*(p['F0'])
+    #     if self.model_info['xpt']:
+    #         output += xdata['eps_pi']**4 * np.log(xdata['eps_pi']**2)*(-p['F0']*p['a_{fpi,4}'] 
+    #         - 2*p['F0']*p['l4_bar'])
+    #         - xdata['eps_pi']**4*(p['F0'])
 
-        else:
-            return 0
+    #     else:
+    #         return 0
 
     def buildprior(self, prior, mopt=False, extend=False):
         return prior

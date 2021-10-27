@@ -6,6 +6,7 @@ import os
 # local modules 
 import non_analytic_functions as naf
 import i_o
+import fpi_fit
 
 class fit_routine(object):
 
@@ -49,21 +50,24 @@ class fit_routine(object):
         extrapolation = Proton(datatag='proton',model_info=self.model_info).extrapolate_mass(observable='sigma_pi_n')
         return extrapolation
 
-    # def extrapolate(self, observable=None, p=None,  data=None):
-    #     if p is None:
-    #         p = {}
-    #         p.update(p)
-    #     if data is None:
-    #         data = self.pp_data
-    #     p.update(data)
-    #     output = {}
-    #     for lsqfit_model in self._make_models():
-    #         obs = lsqfit_model.datatag
-    #         output[obs] = lsqfit_model.fitfcn(p)
+    # def extrapolate(self, observable=None, p=None,  data=None,c2m=1):
+    #     if observable == 'sigma_pi':
+    #         if p is None:
+    #             p = {}
+    #             p.update(self._posterior)
+    #         if data is None:
+    #             data = self.pp_data
+    #         p.update(data)
+    #         p_default = {
+    #             'l3' : -1/4 * (gv.gvar('3.53(26)') + np.log(self.pp_data['eps_pi']**2))
+    #             #'l4' : 
+    #         }
 
-    #     if observable is not None:
-    #         return output[observable]
-    #     return output
+    #         return Proton(fcn_sigma_pi(p=p, model_info=self.model_info)
+
+    #     elif observable == 'm_p':
+    #         return super().extrapolate(observable = 'eps_p', p=p, data=data)* self.pp_data
+
 
     def _make_models(self, model_info=None):
         if model_info is None:
@@ -212,7 +216,41 @@ class Proton(lsqfit.MultiFitterModel):
     def __init__(self, datatag, model_info):
         super(Proton, self).__init__(datatag)
         self.model_info = model_info
-    
+
+    def d_de_lam_chi_lam_chi(self, p,xdata):
+        output = 0
+        if self.model_info['order_light'] in ['lo','n2lo']:
+
+            output += 2 * xdata['eps_pi']* (p['l4_bar']  - np.log(p['eps_pi']**2) -1 )
+
+        if self.model_info['order_light'] in ['n2lo']:
+            output += xdata['eps_pi']**4 * (
+                3/2 * np.log(xdata['eps_pi']**2)**2 + np.log(xdata['eps_pi']**2)*(2*p['c1_F'] + 2*p['l4_bar']+3/2)
+                + 2*p['c2_F'] + p['c1_F'] - p['l4_bar']*(p['l4_bar']-1))
+
+        return output 
+
+    def fitfcn_sigma_pi(self, p): 
+        xdata = {}
+        #xdata['lam_chi'] = p['lam_chi']
+        if self.model_info['fit_phys_units']:
+            xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
+        elif self.model_info['fit_fpi_units']:
+            xdata['eps_pi'] = p['eps_pi']
+        if self.model_info['order_disc'] is not None:
+            xdata['eps2_a'] = p['eps2_a']
+
+        if self.model_info['order_strange'] is not None:
+            xdata['d_eps2_s'] = (2 *p['m_k']**2 - p['m_pi']**2) / p['lam_chi']**2 - 0.3513
+
+        output = 0
+        #if self.model_info['sigma']: # fit to obtain nucleon mass derivative for analytic sigma term #
+        output += self.fitfcn_lo_sigma(p,xdata)
+        output += self.fitfcn_nlo_sigma(p,xdata)
+        output += self.fitfcn_n2lo_sigma(p,xdata)
+        
+        return output
+
     def fitfcn(self, p): #data=None):
         # if data is not None:
         #     for key in data.keys():
@@ -249,27 +287,17 @@ class Proton(lsqfit.MultiFitterModel):
             output += self.fitfcn_n4lo(p,xdata)
         return output
 
-    def fitfcn_sigma_pi(self, p): 
-        xdata = {}
-        #xdata['lam_chi'] = p['lam_chi']
-        if self.model_info['fit_phys_units']:
-            xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
-        elif self.model_info['fit_fpi_units']:
-            xdata['eps_pi'] = p['eps_pi']
-        if self.model_info['order_disc'] is not None:
-            xdata['eps2_a'] = p['eps2_a']
+    def extrapolate_mass(self,observable=None,p=None, xdata=None):
+        if observable == 'sigma_pi':
+            return self.fitfcn_sigma_pi(p)
 
-        if self.model_info['order_strange'] is not None:
-            xdata['d_eps2_s'] = (2 *p['m_k']**2 - p['m_pi']**2) / p['lam_chi']**2 - 0.3513
-
-        output = 0
-        #if self.model_info['sigma']: # fit to obtain nucleon mass derivative for analytic sigma term #
-        output += self.fitfcn_lo_sigma(p,xdata)
-        output += self.fitfcn_nlo_sigma(p,xdata)
-        output += self.fitfcn_n2lo_sigma(p,xdata)
+        if observable == 'proton' :
+            return self.fitfcn(p)
         
-        return output
+        if observable == 'fpi' :
+            return fpi_fit.Fpi.fitfcn(self, p)
 
+    
     #if self.model_includes[]
 
     def fitfcn_llo(self,p,xdata):
@@ -277,13 +305,6 @@ class Proton(lsqfit.MultiFitterModel):
         if self.model_info['order_light'] in ['llo','lo', 'nlo', 'n2lo','n4lo']:
             output+= p['m_{proton,0}']
         return output
-
-    def extrapolate_mass(self,observable=None,p=None, xdata=None):
-        if observable == 'sigma_pi':
-            return self.fitfcn_sigma_pi(p)
-
-        if observable == 'proton' :
-            return self.fitfcn(p)
 
     def fitfcn_lo_xpt(self,p,xdata):
         if self.model_info['xpt']:
@@ -310,7 +331,7 @@ class Proton(lsqfit.MultiFitterModel):
                 output += (p['d_{proton,a}'] * xdata['eps2_a'])
             
             if self.model_info['order_light'] in ['lo','nlo','n2lo','n4lo']:
-                output+= p['l4_bar'] + p['b_{proton,2}']
+                output+= (xdata['eps_pi']**2 * p['b_{proton,2}'])
 
             if self.model_info['order_strange'] in ['lo', 'nlo', 'n2lo']:
                 output+= (p['d_{proton,s}'] * xdata['d_eps2_s'])
@@ -421,12 +442,17 @@ class Proton(lsqfit.MultiFitterModel):
 
         elif self.model_info['fit_fpi_units']:
             if self.model_info['order_light'] in ['n4lo']:
-                output += xdata['eps_pi']**6 *p['b_{proton,6}'] + (xdata['eps_pi']**4 * xdata['eps2_a']**2) 
+                output += xdata['eps_pi']**6 *p['b_{proton,6}'] 
             if self.model_info['order_disc'] in ['n4lo']:
                 output += (
                 + p['d_{proton,all}'] * xdata['eps2_a'] * xdata['eps_pi']**4
-                + p['d_{proton,aal}'] * xdata['eps2_a']**2 * xdata['eps_pi']**2
                 + p['d_{proton,aal}'] * xdata['eps2_a']**3)
+
+            # if self.model_info['order_strange'] in ['n4lo']:
+            #     output += 
+
+            # if self.model_info['order_chiral'] in ['n4lo']:
+                
 
         return output
 
