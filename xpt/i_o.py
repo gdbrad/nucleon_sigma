@@ -32,7 +32,7 @@ class InputOutput(object):
 
     def _get_bs_data(self, scheme=None,units=None):
         to_gvar = lambda arr : gv.gvar(arr[0], arr[1])
-        #hbar_c = self.get_data_phys_point('hbarc') # MeV-fm (PDG 2019 conversion constant)
+        hbar_c = self.get_data_phys_point('hbarc') # MeV-fm (PDG 2019 conversion constant)
         scale_factors = gv.load(self.project_path +'/data/scale_setting.p')
 
         data = {}
@@ -71,7 +71,7 @@ class InputOutput(object):
                     #data[ens]['eps_'+obs] = data[ens]['m_'+obs]
         return data
 
-    def get_data(self, scheme=None,units='Fpi',include_phys=None):
+    def get_data(self, scheme=None,units='phys',include_phys=None):
         bs_data = self._get_bs_data(scheme,units)
         phys_data = self.get_data_phys_point(param='m_proton')
 
@@ -85,6 +85,8 @@ class InputOutput(object):
 
             gv_data[ens] = gv.dataset.avg_data(gv_data[ens], bstrap=True) 
             gv_data[ens]['eps2_a'] = bs_data[ens]['eps2_a']
+            #gv_data[ens]['Fpi'] = bs_data[ens]['Fpi']
+
 
         ensembles = list(gv_data)
         # include physical pt as data pt to (potentially) anchor the fit #

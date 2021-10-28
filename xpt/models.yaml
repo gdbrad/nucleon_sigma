@@ -108,14 +108,14 @@ models:
   fpi:l_n2lo:d_n2lo:x_n2lo:
     particles : [Fpi]
     eps2a_defn : w0_imp
-    order_chiral : nlo    
+    order_chiral : n2lo   
     order_disc : n2lo
     order_strange : Null
-    order_light : lo
+    order_light : n2lo
     xpt_fpi : False
     fv : Null
-    fit_phys_units: False
-    fit_fpi_units : True
+    fit_phys_units: True
+    fit_fpi_units : False
     sigma: Null
     delta: Null
     axial: Null
