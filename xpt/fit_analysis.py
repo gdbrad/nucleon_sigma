@@ -27,6 +27,7 @@ mpl.rcParams['text.usetex'] = True
 
 #internal xpt modules
 import fit_routine as fit
+import fpi_fit
 import i_o
 
 class fit_analysis(object):
@@ -50,10 +51,13 @@ class fit_analysis(object):
         self.model_info = model_info
         self.data = data
         self.fitter = {}
+        self.fitter_fpi = {}
         self._input_prior = prior
         self._phys_point_data = phys_point_data
         self._fit = {}
         self.fitter = fit.fit_routine(prior=prior,data=data, model_info=model_info)
+        #self.fitter_fpi = fpi_fit.fit_routine(prior=prior,data=data, model_info=model_info_fpi)
+
 
         # def __str__(self):
         #     output = "Model: %s" %(self.model) 
@@ -288,13 +292,34 @@ class fit_analysis(object):
             return self.fitter.fit.p
         elif param is not None:
             return self.fitter.fit.p[param]
+        elif param =='fpi':
+            return self.fitter_fpi.fit.p
         else:
             output = {}
             for param in self._input_prior:
                 if param in self.fitter.fit.p:
                     output[param] = self.fitter.fit.p[param]
             return output
+            
+    @property
+    def posterior_fpi(self):
+        return self._get_posterior_fpi()
 
+    # # Returns dictionary with keys fit parameters, entries gvar results
+
+    def _get_posterior_fpi(self,param=None):
+        #output = {}
+        #return self.fit.p
+        if param == 'all':
+            return self.fitter_fpi.fit.p
+        elif param is not None:
+            return self.fitter_fpi.fit.p[param]
+        else:
+            output = {}
+            for param in self._input_prior:
+                if param in self.fitter_fpi.fit.p:
+                    output[param] = self.fitter_fpi.fit.p[param]
+            return output
     @property
     def prior(self):
         return self._get_prior()
@@ -372,6 +397,26 @@ class fit_analysis(object):
         #print(p)
 
         for mdl in self.fitter._make_models():
+            part = mdl.datatag
+            output[part] = mdl.fitfcn(p)
+
+        if particle is None:
+            return output
+        else:
+            return output[particle]
+
+    def fitfcn_fpi(self, p=None, data=None, particle=None):
+        output = {}
+        if p is None:
+            p = {}
+            p.update(self.posterior_fpi)
+        if data is None:
+            data = self.phys_point_data
+            
+        p.update(data)
+        #print(p)
+
+        for mdl in self.fitter_fpi._make_models():
             part = mdl.datatag
             output[part] = mdl.fitfcn(p)
 

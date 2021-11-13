@@ -19,21 +19,28 @@ class InputOutput(object):
             ens_in = sorted(list(f.keys()))
 
         ensembles = sorted(list(set(ens_hyp) & set(ens_in)))
-        ensembles.remove('a12m220')
-        ensembles.remove('a12m220ms')
-        ensembles.remove('a12m310XL')
-        ensembles.remove('a12m220S')
-        ensembles.remove('a12m180L')
-        ensembles.remove('a15m310')
+        # only two lightest pion masses for each ens to test l4_bar #
+        #ensembles = ['a09m135','a09m220','a12m130','a12m220','a15m135XL','a15m220']
+        ensembles = ['a09m135','a09m220']
+        #ensembles = ['a09m135','a09m220']
+        #ensembles = ['a12m130','a12m220']
+        #ensembles = ['a15m135XL','a15m220']
 
-
+        #ensembles.remove('a06m310L')
+        #ensembles.remove('a12m220')
+        # ensembles.remove('a12m220ms')
+        # ensembles.remove('a12m310XL')
+        # ensembles.remove('a12m220S')
+        # ensembles.remove('a12m180L')
+        # ensembles.remove('a15m310')
         self.ensembles = ensembles
         self.project_path = project_path
 
-    def _get_bs_data(self, scheme=None,units=None):
+    def _get_bs_data(self, scheme=None,units='phys'):
         to_gvar = lambda arr : gv.gvar(arr[0], arr[1])
         hbar_c = self.get_data_phys_point('hbarc') # MeV-fm (PDG 2019 conversion constant)
         scale_factors = gv.load(self.project_path +'/data/scale_setting.p')
+        a_fm =  gv.load(self.project_path +'/data/a_fm_results.p')
 
         data = {}
         with h5py.File(self.project_path+'/data/input_data.h5', 'r') as f: 
@@ -43,20 +50,19 @@ class InputOutput(object):
                     data[ens]['units'] = hbar_c *scale_factors[scheme+':'+ens[:3]] /scale_factors[scheme+':w0']
                 elif scheme in ['w0_org', 'w0_imp'] and units=='Fpi':
                     data[ens]['units'] = scale_factors[scheme+':'+ens[:3]]
-                #data[ens]['units_MeV'] = hbar_c / to_gvar(f[ens]['a_fm'][scheme][:])
+                data[ens]['units_MeV'] = hbar_c / to_gvar(f[ens]['a_fm'][scheme][:])
                 data[ens]['alpha_s'] = f[ens]['alpha_s']
                 data[ens]['L'] = f[ens]['L']
                 data[ens]['m_pi'] = f[ens]['mpi'][1:]
                 data[ens]['m_k'] = f[ens]['mk'][1:]
                 data[ens]['lam_chi'] = 4 *np.pi *f[ens]['Fpi'][1:]
-                data[ens]['Fpi'] = f[ens]['Fpi'][1:]
-                
+                data[ens]['Fpi'] = f[ens]['Fpi'][1:] 
+               # data[ens]['Fpi'] = data[ens]['Fpi'] * data[ens]['units']
                 # if units=='Fpi':
                 #     data[ens]['units'] = 1/data[ens]['lam_chi'] #for removing lam_chi dependence of fits 
                 data[ens]['eps_pi'] = data[ens]['m_pi'] / data[ens]['lam_chi']
                 data[ens]['eps_k'] = data[ens]['m_k']/data[ens]['lam_chi']
-                data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2) 
-
+                data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2)
 
         with h5py.File(self.project_path+'/data/hyperon_data.h5', 'r') as f:
             for ens in self.ensembles:
@@ -69,6 +75,8 @@ class InputOutput(object):
                 for obs in ['proton','delta']:
                     data[ens]['eps_'+obs] = data[ens]['m_'+obs] / data[ens]['lam_chi']
                     #data[ens]['eps_'+obs] = data[ens]['m_'+obs]
+
+        #data[ens]['a'] = 
         return data
 
     def get_data(self, scheme=None,units='phys',include_phys=None):
@@ -78,14 +86,28 @@ class InputOutput(object):
         gv_data = {}
         
         dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi']
+        #fpi = 'Fpi'
         for ens in self.ensembles:
             gv_data[ens] = {}
             for obs in dim1_obs:
                 gv_data[ens][obs] = bs_data[ens][obs] #- np.mean(bs_data[ens][obs]) + bs_data[ens][obs][0]
+                #gv_data[ens][obs] = bs_data[ens][obs] * bs_data[ens]['units_MeV']
 
-            gv_data[ens] = gv.dataset.avg_data(gv_data[ens], bstrap=True) 
+            gv_data[ens] = gv.dataset.avg_data(gv_data[ens], bstrap=True)
+            gv_data[ens]['Fpi'] = gv_data[ens][obs] *bs_data[ens]['units_MeV']
+            #gv_data[ens]['m_pi'] = gv_data[ens][obs] *bs_data[ens]['units_MeV']
             gv_data[ens]['eps2_a'] = bs_data[ens]['eps2_a']
-            #gv_data[ens]['Fpi'] = bs_data[ens]['Fpi']
+
+        gv_data['a09m135']['m_q']   = ((0.00152 + (0.938 / 10**4)) /  gv.gvar('0.08730(70)'))* self.get_data_phys_point(param='hbarc') 
+        gv_data['a09m220']['m_q']   = ((0.00449 + (1.659 / 10**4)) /  gv.gvar('0.08730(70)')) * self.get_data_phys_point(param='hbarc')
+        # gv_data['a09m310']['m_q']   = ((0.00951 + (2.694 / 10**4)) /  gv.gvar('0.08730(70)')) * self.get_data_phys_point(param='hbarc')
+        # gv_data['a09m350']['m_q']   = ((0.0121 + (2.560 / 10**4)) /  gv.gvar('0.08730(70)')) * self.get_data_phys_point(param='hbarc')
+        # gv_data['a12m130'] ['m_q']  = (0.00195 + (1.642 / 10**4) /  gv.gvar('0.12066(88)')) * self.get_data_phys_point(param='hbarc') 
+        # gv_data['a12m220']['m_q']   = (0.006   + (4.050 / 10**4) /  gv.gvar('0.12066(88)')) * self.get_data_phys_point(param='hbarc') 
+        # gv_data['a15m135XL']['m_q'] = (0.00237 + (2.706 / 10**4) /  gv.gvar('0.1505(10)')) * self.get_data_phys_point(param='hbarc') 
+        # gv_data['a15m220']['m_q']   = (0.00712 + (5.736 / 10**4) /  gv.gvar('0.1505(10)')) * self.get_data_phys_point(param='hbarc') 
+            #gv_data[ens]['a/w:impr'] = bs_data[ens]['a/w:impr']
+            #gv_data[ens]['Fpi'] = bs_data[ens]['Fpi'] * bs_data[ens]['units_MeV']
 
 
         ensembles = list(gv_data)
@@ -112,7 +134,7 @@ class InputOutput(object):
             'a' : gv.gvar(0),
             'alpha_s' : gv.gvar(0.0),
             'L' : gv.gvar(np.infty),
-            'hbarc' : gv.gvar(197.3269804, 0), # MeV-fm
+            'hbarc' : 197.3269804, # MeV-fm
 
             'lam_chi' : 4 *np.pi *gv.gvar('92.07(57)'),
             'm_pi' : gv.gvar('134.8(3)'), # '138.05638(37)'

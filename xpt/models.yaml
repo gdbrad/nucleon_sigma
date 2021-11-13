@@ -1,5 +1,20 @@
 models:
 
+  simul:taylor:l_lo:x_lo:d_lo:
+    particles : [proton,Fpi]
+    eps2a_defn : w0_imp
+    order_chiral : lo    
+    order_disc : lo
+    order_strange : lo
+    order_light : lo
+    xpt : False
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+    sigma: False
+    delta: False
+    axial: True
+
   eps_p:taylor:l_lo:
     particles : [proton]
     eps2a_defn : w0_imp
@@ -114,12 +129,58 @@ models:
     order_light : n2lo
     xpt_fpi : False
     fv : Null
-    fit_phys_units: True
-    fit_fpi_units : False
-    sigma: Null
-    delta: Null
-    axial: Null
-  
+    fit_phys_units: False
+    fit_fpi_units : True
+
+  fpi:l_lo:d_lo:x_lo:
+    particles : [Fpi]
+    eps2a_defn : w0_imp
+    order_chiral : lo   
+    order_disc : lo
+    order_strange : Null
+    order_light : Null
+    xpt_fpi : False
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+
+  fpi:l4_bar:
+    particles : [Fpi]
+    eps2a_defn : w0_imp
+    order_chiral : lo   
+    order_disc : lo
+    order_strange : Null
+    order_light : lo
+    xpt_fpi : False
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+
+  mpi:l_lo:d_lo:x_lo:
+    particles : [mpi]
+    eps2a_defn : w0_imp
+    order_chiral : lo   
+    order_disc : Null
+    order_strange : Null
+    order_light : lo
+    xpt_fpi : Null
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+
+  mpi:l_n2lo:d_n2lo:x_n2lo:
+    particles : [mpi]
+    eps2a_defn : w0_imp
+    order_chiral : n2lo   
+    order_disc : Null
+    order_strange : Null
+    order_light : n2lo
+    xpt_fpi : Null
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+
+
   
   eps_p:taylor:l_n4lo:s_n4lo:d_lo:
     particles : [proton]
