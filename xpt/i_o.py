@@ -20,14 +20,14 @@ class InputOutput(object):
 
         ensembles = sorted(list(set(ens_hyp) & set(ens_in)))
         # only two lightest pion masses for each ens to test l4_bar #
-        #ensembles = ['a09m135','a09m220','a12m130','a12m220','a15m135XL','a15m220']
-        ensembles = ['a09m135','a09m220']
-        #ensembles = ['a09m135','a09m220']
+        ensembles = ['a09m135','a09m220','a09m310','a09m350','a09m400','a12m130','a12m220','a12m310','a12m350','a12m400','a15m135XL','a15m220','a15m310','a15m350','a15m400']
+        #ensembles = ['a09m135','a09m220','a09m310','a09m350','a09m400']
+        #ensembles = ['a09m135','a09m220','a09m310', 'a09m350']
         #ensembles = ['a12m130','a12m220']
         #ensembles = ['a15m135XL','a15m220']
 
-        #ensembles.remove('a06m310L')
-        #ensembles.remove('a12m220')
+        # ensembles.remove('a06m310L')
+        # #ensembles.remove('a12m220')
         # ensembles.remove('a12m220ms')
         # ensembles.remove('a12m310XL')
         # ensembles.remove('a12m220S')
@@ -54,6 +54,7 @@ class InputOutput(object):
                 data[ens]['alpha_s'] = f[ens]['alpha_s']
                 data[ens]['L'] = f[ens]['L']
                 data[ens]['m_pi'] = f[ens]['mpi'][1:]
+
                 data[ens]['m_k'] = f[ens]['mk'][1:]
                 data[ens]['lam_chi'] = 4 *np.pi *f[ens]['Fpi'][1:]
                 data[ens]['Fpi'] = f[ens]['Fpi'][1:] 
@@ -64,6 +65,22 @@ class InputOutput(object):
                 data[ens]['eps_k'] = data[ens]['m_k']/data[ens]['lam_chi']
                 data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2)
 
+        data['a09m135']['m_q']   = ((0.00152 + (0.938 / 10**4)) /  gv.gvar('0.08730(70)'))* hbar_c 
+        data['a09m220']['m_q']   = ((0.00449 + (1.659 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+        data['a09m310']['m_q']   = ((0.00951 + (2.694 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+        data['a09m350']['m_q']   = ((0.0121 + (2.560 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+        data['a09m400']['m_q']   = ((0.0160 + (2.532 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+        data['a12m130'] ['m_q']  = ((0.00195 + (1.642 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
+        data['a12m220']['m_q']   = ((0.006   + (4.050 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c
+        data['a12m310']['m_q']   = ((0.0126   + (7.702 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
+        data['a12m350']['m_q']   = ((0.0166   + (7.579 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
+        data['a12m400']['m_q']   = ((0.0219   + (7.337 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c  
+        data['a15m135XL']['m_q'] = ((0.00237 + (2.706 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
+        data['a15m220']['m_q']   = ((0.00712 + (5.736 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
+        data['a15m310']['m_q']   = ((0.0158 + (9.563 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
+        data['a15m350']['m_q']   = ((0.0206 + (9.416 / 10**4))/  gv.gvar('0.1505(10)')) * hbar_c 
+        data['a15m400']['m_q']   = ((0.0278 + (9.365 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c
+
         with h5py.File(self.project_path+'/data/hyperon_data.h5', 'r') as f:
             for ens in self.ensembles:
                 for obs in list(f[ens]):
@@ -72,45 +89,53 @@ class InputOutput(object):
                     for obs in list(f[ens+'_hp']):
                         data[ens].update({obs : f[ens+'_hp'][obs][:]})
 
-                for obs in ['proton','delta']:
+                for obs in ['proton']:
                     data[ens]['eps_'+obs] = data[ens]['m_'+obs] / data[ens]['lam_chi']
                     #data[ens]['eps_'+obs] = data[ens]['m_'+obs]
 
-        #data[ens]['a'] = 
+        with h5py.File(self.project_path+'/data/FK_Fpi_data.h5', 'r') as f:
+            for ens in self.ensembles:
+                data[ens]['a2DI'] = f[ens]['a2DI'][1:]
+                data[ens]['m_pi_sea'] = f[ens]['mpi'][1:]
+                data[ens]['eps_pi_sea'] = data[ens]['m_pi_sea'] / data[ens]['lam_chi']
+                data[ens]['eps_pi_sea_tilde'] = (data[ens]['m_pi_sea'] + data[ens]['a2DI']) / data[ens]['lam_chi']
+
+
         return data
 
-    def get_data(self, scheme=None,units='phys',include_phys=None):
+
+
+    def get_data(self, scheme=None,units='phys',include_phys=False,ensembles=None):
         bs_data = self._get_bs_data(scheme,units)
         phys_data = self.get_data_phys_point(param='m_proton')
+        hbar_c = self.get_data_phys_point('hbarc')
 
         gv_data = {}
         
-        dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi']
+        dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi','m_pi_sea','eps_pi_sea','eps_pi_sea_tilde']
         #fpi = 'Fpi'
-        for ens in self.ensembles:
+        for ens in ensembles:
+            
             gv_data[ens] = {}
             for obs in dim1_obs:
                 gv_data[ens][obs] = bs_data[ens][obs] #- np.mean(bs_data[ens][obs]) + bs_data[ens][obs][0]
                 #gv_data[ens][obs] = bs_data[ens][obs] * bs_data[ens]['units_MeV']
+                #gv_data[ens]['m_pi'] = bs_data[ens]['m_pi'] * bs_data[ens]['units_MeV']
 
             gv_data[ens] = gv.dataset.avg_data(gv_data[ens], bstrap=True)
             gv_data[ens]['Fpi'] = gv_data[ens][obs] *bs_data[ens]['units_MeV']
             #gv_data[ens]['m_pi'] = gv_data[ens][obs] *bs_data[ens]['units_MeV']
             gv_data[ens]['eps2_a'] = bs_data[ens]['eps2_a']
-
-        gv_data['a09m135']['m_q']   = ((0.00152 + (0.938 / 10**4)) /  gv.gvar('0.08730(70)'))* self.get_data_phys_point(param='hbarc') 
-        gv_data['a09m220']['m_q']   = ((0.00449 + (1.659 / 10**4)) /  gv.gvar('0.08730(70)')) * self.get_data_phys_point(param='hbarc')
-        # gv_data['a09m310']['m_q']   = ((0.00951 + (2.694 / 10**4)) /  gv.gvar('0.08730(70)')) * self.get_data_phys_point(param='hbarc')
-        # gv_data['a09m350']['m_q']   = ((0.0121 + (2.560 / 10**4)) /  gv.gvar('0.08730(70)')) * self.get_data_phys_point(param='hbarc')
-        # gv_data['a12m130'] ['m_q']  = (0.00195 + (1.642 / 10**4) /  gv.gvar('0.12066(88)')) * self.get_data_phys_point(param='hbarc') 
-        # gv_data['a12m220']['m_q']   = (0.006   + (4.050 / 10**4) /  gv.gvar('0.12066(88)')) * self.get_data_phys_point(param='hbarc') 
-        # gv_data['a15m135XL']['m_q'] = (0.00237 + (2.706 / 10**4) /  gv.gvar('0.1505(10)')) * self.get_data_phys_point(param='hbarc') 
-        # gv_data['a15m220']['m_q']   = (0.00712 + (5.736 / 10**4) /  gv.gvar('0.1505(10)')) * self.get_data_phys_point(param='hbarc') 
-            #gv_data[ens]['a/w:impr'] = bs_data[ens]['a/w:impr']
+            gv_data[ens]['m_q'] = bs_data[ens]['m_q']
+            #gv_data[ens]['m_pi_mev'] = bs_data[ens]['m_pi'] * bs_data[ens]['units_MeV']
+            gv_data[ens]['m_pi'] = gv_data[ens]['m_pi'] *bs_data[ens]['units_MeV']
+            gv_data[ens]['m_pi_sq'] = gv_data[ens]['m_pi']**2
+            gv_data[ens]['a2DI'] = bs_data[ens]['a2DI']
+            
             #gv_data[ens]['Fpi'] = bs_data[ens]['Fpi'] * bs_data[ens]['units_MeV']
 
 
-        ensembles = list(gv_data)
+        #ensembles = list(gv_data)
         # include physical pt as data pt to (potentially) anchor the fit #
         if include_phys:
             data_pp = self.get_data_phys_point()
@@ -123,9 +148,13 @@ class InputOutput(object):
 
             ensembles.insert(0, 'a00m135')
         output = {}
-        for param in gv_data[self.ensembles[0]]:
-            output[param] = np.array([gv_data[ens][param] for ens in self.ensembles])
-        return output, ensembles
+        # for param in gv_data[self.ensembles[0]]:
+        #     output[param] = np.array([gv_data[ens][param] for ens in self.ensembles])
+        # return output, ensembles
+
+        for param in gv_data[ensembles[0]]:
+            output[param] = np.array([gv_data[ens][param] for ens in ensembles])
+        return output
 
 
     def get_data_phys_point(self, param=None):

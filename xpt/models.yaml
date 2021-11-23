@@ -160,7 +160,7 @@ models:
     particles : [mpi]
     eps2a_defn : w0_imp
     order_chiral : lo   
-    order_disc : Null
+    order_disc : lo
     order_strange : Null
     order_light : lo
     xpt_fpi : Null
@@ -172,7 +172,7 @@ models:
     particles : [mpi]
     eps2a_defn : w0_imp
     order_chiral : n2lo   
-    order_disc : Null
+    order_disc : n2lo
     order_strange : Null
     order_light : n2lo
     xpt_fpi : Null

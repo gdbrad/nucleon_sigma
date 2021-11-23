@@ -15,12 +15,15 @@ class fit_routine(object):
         self.data = data
         #self.load = i_o.InputOutput()
         self.model_info = model_info.copy()
+        #self.ensembles = ensembles.copy()
+        #self.ensembles = ensembles
         self._fit = None
+        self._fit_interpolation = None
         self._extrapolate = None
         self._simultaneous = False
         self._posterior = None
         #self.phys_point_data = loader.get_data_phys_point(param=None)
-        mpisq_mev = (self.data['m_pi'] / gv.gvar('0.08730(70)') * 197.3269804)**2
+        mpisq_mev = (self.data['m_pi'])**2
         self.y = {'mpi' : gv.gvar([(g).mean for g in mpisq_mev], [(g).sdev for g in mpisq_mev])} 
         #self.y = {'mpi' self.data['m_pi']**2}
     def __str__(self):
@@ -37,6 +40,34 @@ class fit_routine(object):
             self._fit = fit
 
         return self._fit 
+
+    @property
+    def fit_interpolation(self, simultaneous=None):
+        if simultaneous is None:
+            simultaneous = self._simultaneous
+
+        if self._fit_interpolation is None or simultaneous != self._simultaneous:
+            self._simultaneous = simultaneous
+            #make_gvar = lambda g : gv.gvar(gv.mean(g), gv.sdev(g))
+            #y_data = make_gvar(1 / self.fit_data['a/w'])
+
+            # make_gvar = lambda g : gv.gvar(gv.mean(g), gv.sdev(g))
+            # if self.observable == 'B':
+            #     data = {self.model_info['name']+'_interpolation' : 1 / make_gvar(self.fit_data['a/w']) }
+            # elif self.observable == 't0':
+            #     data = {self.model_info['name']+'_interpolation' : make_gvar(self.fit_data['t/a^2']) }
+
+            if simultaneous:
+                data = self.y
+
+            models = self._make_models(interpolation=True, simultaneous=simultaneous)
+            prior = self._make_prior(interpolation=True, simultaneous=simultaneous)
+
+            fitter = lsqfit.MultiFitter(models=models)
+            fit = fitter.lsqfit(data=data, prior=prior, fast=False, mopt=False)
+            self._fit_interpolation = fit
+
+        return self._fit_interpolation
 
     def _make_models(self, model_info=None):
         if model_info is None:
@@ -56,6 +87,12 @@ class fit_routine(object):
             data = self.data
         prior = self.prior
         new_prior = {}
+        # for axx in np.unique([ens.split('m')[0] for ens in self.ensembles]):
+        #         newprior['B'+aXX] = prior['B'+aXX]
+
+        #     # add priors for other LECs
+        # for key in set(list(prior)).difference(['Ba09', 'Ba12', 'Ba15']):
+        #     newprior[key] = prior[key]
         particles = []
         particles.extend(self.model_info['particles'])
 
@@ -69,8 +106,6 @@ class fit_routine(object):
                     orders = ['lo']
                 elif value == 'n2lo':
                     orders = ['lo','n2lo']
-                # elif value == 'n4lo':
-                #     orders = ['llo', 'lo', 'nlo','n2lo', 'n4lo']
                 else:
                     orders = []
                 for o in orders:
@@ -87,7 +122,7 @@ class fit_routine(object):
             new_prior['m_q'] = data['m_q']
             #new_prior['B'] = data['B']
             #new_prior['m_pi_sq'] = data['m_pi_sq']
-            #new_prior['eps2_a'] = data['eps2_a']
+            new_prior['eps2_a'] = data['eps2_a']
             new_prior['m_pi'] = data['m_pi']
             #new_prior['lam_chi'] = data['lam_chi']
         if self.model_info['order_disc'] is not None:
@@ -130,7 +165,7 @@ class fit_routine(object):
                 output[p] = {}
                 for o in ['llo', 'lo', 'nlo','n2lo']:
                     output[p][o] = {}
-            
+
             output['mpi']['lo']['light']    = ['B','l_3']
             output['mpi']['lo']['disc']     = ['d_{mpi,a}']
             output['mpi']['lo']['xpt']      = []
@@ -151,6 +186,9 @@ class Mpi(lsqfit.MultiFitterModel):
     
     def fitfcn(self, p,xdata=None):
         xdata = {}
+        xdata['eps_pi_pp'] = self.phys['eps_pi']
+        xdata['eps_pi_sea_tilde'] = p['eps_pi_sea_tilde']
+        xdata['eps_pi_sea'] = p['eps_pi_sea']
         #xdata['lam_chi'] = p['lam_chi']
         if self.model_info['fit_phys_units']:
             xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
@@ -159,6 +197,167 @@ class Mpi(lsqfit.MultiFitterModel):
         if self.model_info['order_disc'] is not None:
             xdata['eps2_a'] = p['eps2_a']
 
+        # M0 = M^2 = 2mB
+        msq = 2 * p['B'] * p['m_q'] 
+        output = msq *(
+        + 1
+        + self.fitfcn_lo(p,xdata) 
+        + self.fitfcn_lo_xpt(p,xdata)
+        + self.fitfcn_n2lo(p,xdata)
+        + self.fitfcn_n2lo_xpt(p,xdata)
+        )
+        return output
+
+    def fitfcn_lo(self,p,xdata):
+
+        output = 0
+        if self.model_info['order_light'] in ['lo','n2lo']:
+            output += xdata['eps_pi']**2 * (2*p['l_3'])
+    
+        if self.model_info['order_disc'] in ['lo','n2lo']:
+            output += (p['d_{mpi,a}'] * xdata['eps2_a'])
+        return output
+
+    def fitfcn_lo_xpt(self, p,xdata):
+        output = 0
+        if self.model_info['order_chiral'] in ['lo','n2lo']:
+            output +=  xdata['eps_pi']**2 * (1/2 * np.log(xdata['eps_pi']**2))
+
+        return output
+        
+    def fitfcn_lo_ma_xpt(self, p,xdata):
+        output = 0
+        if self.model_info['mixed_action']:
+            output +=  xdata['eps_pi']**2 * (1/2 * np.log(xdata['eps_pi']**2/xdata['eps_pi_pp']**2))
+            - p['l_3_pq']*(xdata['eps_pi_sea']**2 - xdata['eps_pi']**2) + p['l_3^b']*(p['b']/p['r_1'])**2
+
+        return output
+
+    def fitfcn_lo_ma(self,p,xdata):
+        output = 0
+        if self.model_info['order_light'] in ['lo','n2lo']:
+            output += -1/2*xdata['eps_pi']**2 * (p['l_3']) 
+            - 1/2*(xdata['eps_pi_sea_tilde']**2 - xdata['eps_pi']**2) - 1/2*(xdata['eps_pi_sea_tilde']**2 - xdata['eps_pi']**2)*(np.log(xdata['eps_pi']**2))
+    
+        if self.model_info['order_disc'] in ['lo','n2lo']:
+            output += (p['d_{mpi,a}'] * xdata['eps2_a'])
+        return output
+
+
+
+    def fitfcn_n2lo_xpt(self,p,xdata):
+        output = 0
+        if self.model_info['order_chiral'] in ['n2lo']:
+            output += 7/8*(xdata['eps_pi']**4*(np.log(xdata['eps_pi']**2)**2 +p['c_{mpi,1F}']*np.log(xdata['eps_pi']**2)))
+             
+        return output
+
+    def fitfcn_n2lo(self,p,xdata):
+        output = 0
+        if self.model_info['order_light'] in ['n2lo']:
+            output += xdata['eps_pi']**4*(p['c_{mpi,2F}'])
+
+        if self.model_info['order_disc'] in ['n2lo']:
+            output +=  p['d_{mpi,al}'] * xdata['eps2_a'] * xdata['eps_pi']**4 +p['d_{mpi,aa}'] * xdata['eps2_a']**2
+
+        return output
+
+    def buildprior(self, prior, mopt=False, extend=False):
+        return prior
+
+    def builddata(self, data):
+        return data[self.datatag]
+
+class Mpi_ma_xpt(lsqfit.MultiFitterModel):
+    def __init__(self, datatag, model_info):
+        super(Mpi, self).__init__(datatag)
+        self.model_info = model_info
+        self.phys = InputOutput().get_data_phys_point()
+    
+    def fitfcn(self, p,xdata=None):
+        xdata = {}
+        #xdata['lam_chi'] = p['lam_chi']
+        if self.model_info['fit_phys_units']:
+            xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
+        elif self.model_info['fit_fpi_units']:
+            xdata['eps_pi'] = p['eps_pi']
+        if self.model_info['order_disc'] is not None:
+            xdata['eps2_a'] = p['eps2_a']
+
+        # M0 = M^2 = 2mB
+        msq = 2 * p['B'] * p['m_q'] 
+        output = msq *(
+        + 1
+        + self.fitfcn_lo(p,xdata) 
+        + self.fitfcn_lo_xpt(p,xdata)
+        + self.fitfcn_n2lo(p,xdata)
+        + self.fitfcn_n2lo_xpt(p,xdata)
+        )
+        return output
+
+    def fitfcn_lo(self,p,xdata):
+
+        output = 0
+        if self.model_info['order_light'] in ['lo','n2lo']:
+            output += xdata['eps_pi']**2 * (2*p['l_3'])
+    
+        if self.model_info['order_disc'] in ['lo','n2lo']:
+            output += (p['d_{mpi,a}'] * xdata['eps2_a'])
+        return output
+
+    def fitfcn_lo_xpt(self, p,xdata):
+        output = 0
+        if self.model_info['order_chiral'] in ['lo','n2lo']:
+            output +=  xdata['eps_pi']**2 * (1/2 * np.log(xdata['eps_pi']**2))
+
+        return output
+
+    def fitfcn_n2lo_xpt(self,p,xdata):
+        output = 0
+        if self.model_info['order_chiral'] in ['n2lo']:
+            output += 7/8*(xdata['eps_pi']**4*(np.log(xdata['eps_pi']**2)**2 +p['c_{mpi,1F}']*np.log(xdata['eps_pi']**2)))
+             
+        return output
+
+    def fitfcn_n2lo(self,p,xdata):
+        output = 0
+        if self.model_info['order_light'] in ['n2lo']:
+            output += xdata['eps_pi']**4*(p['c_{mpi,2F}'])
+
+        if self.model_info['order_disc'] in ['n2lo']:
+            output +=  p['d_{mpi,al}'] * xdata['eps2_a'] * xdata['eps_pi']**4 +p['d_{mpi,aa}'] * xdata['eps2_a']**2
+
+        return output
+
+    def buildprior(self, prior, mopt=False, extend=False):
+        return prior
+
+    def builddata(self, data):
+        return data[self.datatag]
+
+
+class Mpi_B(lsqfit.MultiFitterModel):
+    def __init__(self, datatag, model_info):
+        super(Mpi_B, self).__init__(datatag)
+        self.model_info = model_info
+        self.phys = InputOutput().get_data_phys_point()
+    
+    def fitfcn(self, p,xdata=None,latt_spacing=None):
+        xdata = {}
+        #xdata['lam_chi'] = p['lam_chi']
+        if self.model_info['fit_phys_units']:
+            xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
+        elif self.model_info['fit_fpi_units']:
+            xdata['eps_pi'] = p['eps_pi']
+        if self.model_info['order_disc'] is not None:
+            xdata['eps2_a'] = p['eps2_a']
+        
+        if latt_spacing == 'a09':
+            p['B']= p['Ba09']
+        elif latt_spacing == 'a12':
+            p['B'] = p['Ba12']
+        elif latt_spacing == 'a15':
+            p['B'] = p['Ba15']
         # M0 = M^2 = 2mB
         msq = 2 * p['B'] * p['m_q'] 
         output = msq *(
