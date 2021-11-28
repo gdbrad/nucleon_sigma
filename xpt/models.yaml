@@ -180,6 +180,20 @@ models:
     fit_phys_units: False
     fit_fpi_units : True
 
+  mpi_ma:l_n2lo:d_n2lo:x_n2lo:
+    particles : [mpi]
+    eps2a_defn : w0_imp
+    order_chiral : n2lo   
+    order_disc : n2lo
+    order_strange : Null
+    order_light : n2lo
+    xpt_fpi : Null
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+    mixed_action: True
+    ma_log: True
+
 
   
   eps_p:taylor:l_n4lo:s_n4lo:d_lo:

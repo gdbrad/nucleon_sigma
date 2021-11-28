@@ -64,6 +64,7 @@ class InputOutput(object):
                 data[ens]['eps_pi'] = data[ens]['m_pi'] / data[ens]['lam_chi']
                 data[ens]['eps_k'] = data[ens]['m_k']/data[ens]['lam_chi']
                 data[ens]['eps2_a'] = (1 / (2 *to_gvar(f[ens]['w0a_callat_imp']))**2)
+            # abstract this to a dict with keys ens #
 
         data['a09m135']['m_q']   = ((0.00152 + (0.938 / 10**4)) /  gv.gvar('0.08730(70)'))* hbar_c 
         data['a09m220']['m_q']   = ((0.00449 + (1.659 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
@@ -96,14 +97,8 @@ class InputOutput(object):
         with h5py.File(self.project_path+'/data/FK_Fpi_data.h5', 'r') as f:
             for ens in self.ensembles:
                 data[ens]['a2DI'] = f[ens]['a2DI'][1:]
-                data[ens]['m_pi_sea'] = f[ens]['mpi'][1:]
-                data[ens]['eps_pi_sea'] = data[ens]['m_pi_sea'] / data[ens]['lam_chi']
-                data[ens]['eps_pi_sea_tilde'] = (data[ens]['m_pi_sea'] + data[ens]['a2DI']) / data[ens]['lam_chi']
-
-
+                data[ens]['eps_pi_sea_tilde'] = (data[ens]['m_pi'] + data[ens]['a2DI']) / data[ens]['lam_chi']
         return data
-
-
 
     def get_data(self, scheme=None,units='phys',include_phys=False,ensembles=None):
         bs_data = self._get_bs_data(scheme,units)
@@ -112,7 +107,7 @@ class InputOutput(object):
 
         gv_data = {}
         
-        dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi','m_pi_sea','eps_pi_sea','eps_pi_sea_tilde']
+        dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi','eps_pi_sea_tilde','a2DI']
         #fpi = 'Fpi'
         for ens in ensembles:
             
@@ -130,7 +125,7 @@ class InputOutput(object):
             #gv_data[ens]['m_pi_mev'] = bs_data[ens]['m_pi'] * bs_data[ens]['units_MeV']
             gv_data[ens]['m_pi'] = gv_data[ens]['m_pi'] *bs_data[ens]['units_MeV']
             gv_data[ens]['m_pi_sq'] = gv_data[ens]['m_pi']**2
-            gv_data[ens]['a2DI'] = bs_data[ens]['a2DI']
+            #gv_data[ens]['a2DI'] = bs_data[ens]['a2DI']
             
             #gv_data[ens]['Fpi'] = bs_data[ens]['Fpi'] * bs_data[ens]['units_MeV']
 
