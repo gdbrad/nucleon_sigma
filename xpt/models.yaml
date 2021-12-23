@@ -157,16 +157,20 @@ models:
     fit_fpi_units : True
 
   mpi:l_lo:d_lo:x_lo:
+    name: mpi_nlo_cont
     particles : [mpi]
     eps2a_defn : w0_imp
     order_chiral : lo   
-    order_disc : lo
+    order_disc : Null
     order_strange : Null
     order_light : lo
     xpt_fpi : Null
     fv : Null
     fit_phys_units: False
     fit_fpi_units : True
+    mixed_action: False
+    ma_log: False
+
 
   mpi:l_n2lo:d_n2lo:x_n2lo:
     particles : [mpi]
@@ -179,6 +183,8 @@ models:
     fv : Null
     fit_phys_units: False
     fit_fpi_units : True
+    mixed_action: False
+    ma_log: False
 
   mpi_ma:l_n2lo:d_n2lo:x_n2lo:
     particles : [mpi]
@@ -187,6 +193,20 @@ models:
     order_disc : n2lo
     order_strange : Null
     order_light : n2lo
+    xpt_fpi : Null
+    fv : Null
+    fit_phys_units: False
+    fit_fpi_units : True
+    mixed_action: True
+    ma_log: True
+
+  mpi_ma:l_lo:d_lo:x_lo:
+    particles : [mpi]
+    eps2a_defn : w0_imp
+    order_chiral : lo   
+    order_disc : lo
+    order_strange : Null
+    order_light : lo
     xpt_fpi : Null
     fv : Null
     fit_phys_units: False

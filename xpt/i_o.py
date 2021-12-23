@@ -21,10 +21,6 @@ class InputOutput(object):
         ensembles = sorted(list(set(ens_hyp) & set(ens_in)))
         # only two lightest pion masses for each ens to test l4_bar #
         ensembles = ['a09m135','a09m220','a09m310','a09m350','a09m400','a12m130','a12m220','a12m310','a12m350','a12m400','a15m135XL','a15m220','a15m310','a15m350','a15m400']
-        #ensembles = ['a09m135','a09m220','a09m310','a09m350','a09m400']
-        #ensembles = ['a09m135','a09m220','a09m310', 'a09m350']
-        #ensembles = ['a12m130','a12m220']
-        #ensembles = ['a15m135XL','a15m220']
 
         # ensembles.remove('a06m310L')
         # #ensembles.remove('a12m220')
@@ -81,6 +77,22 @@ class InputOutput(object):
         data['a15m310']['m_q']   = ((0.0158 + (9.563 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
         data['a15m350']['m_q']   = ((0.0206 + (9.416 / 10**4))/  gv.gvar('0.1505(10)')) * hbar_c 
         data['a15m400']['m_q']   = ((0.0278 + (9.365 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c
+
+                # data[0]['m_q']   = ((0.00152 + (0.938 / 10**4)) /  gv.gvar('0.08730(70)'))* hbar_c 
+                # data[1]['m_q']   = ((0.00449 + (1.659 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+                # data[2]['m_q']   = ((0.00951 + (2.694 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+                # data[3]['m_q']   = ((0.0121 + (2.560 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+                # data[4]['m_q']   = ((0.0160 + (2.532 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
+                # data[5] ['m_q']  = ((0.00195 + (1.642 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
+                # data[6]['m_q']   = ((0.006   + (4.050 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c
+                # data[7]['m_q']   = ((0.0126   + (7.702 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
+                # data[8]['m_q']   = ((0.0166   + (7.579 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
+                # data[9]['m_q']   = ((0.0219   + (7.337 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c  
+                # data[10]['m_q'] = ((0.00237 + (2.706 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
+                # data[11]['m_q']   = ((0.00712 + (5.736 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
+                # data[12]['m_q']   = ((0.0158 + (9.563 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
+                # data[13]['m_q']   = ((0.0206 + (9.416 / 10**4))/  gv.gvar('0.1505(10)')) * hbar_c 
+                # data[14]['m_q']   = ((0.0278 + (9.365 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c
 
         with h5py.File(self.project_path+'/data/hyperon_data.h5', 'r') as f:
             for ens in self.ensembles:
