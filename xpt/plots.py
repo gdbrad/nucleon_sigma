@@ -7,13 +7,13 @@ import io
 import yaml
 import matplotlib
 import matplotlib.pyplot as plt
-import fit_analysis
+# import fit_analysis
 
 
 
 
 
-def plot_parameters(ensembles,xparam, yparam):
+def plot_params(fit,ensembles,xparam, yparam):
         # if yparam is None:
         #     yparam = 'eps_proton'
 
@@ -34,8 +34,12 @@ def plot_parameters(ensembles,xparam, yparam):
         for i in  range(len(ensembles)):
             for j, param in enumerate([xparam, yparam]):
                 if param == 'mp':
-                    value = fit.y['proton'][i]
+                    value = fit.y[''][i]
                     label = '$\epsilon_p$'
+
+                elif param in ['sigma','sigma_st','xi','xi_st','lam']:
+                    value = fit.y[param][i]
+                    label = '$\epsilon_\pi$'
 
                 elif param == 'eps_pi':
                     value = fit.p['eps_pi'][i]

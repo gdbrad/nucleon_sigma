@@ -4,8 +4,8 @@ import gvar as gv
 import sys
 import os
 # local modules 
-import non_analytic_functions as naf
-from i_o import InputOutput
+import xpt.non_analytic_functions as naf
+from xpt.i_o import InputOutput
 
 class fit_routine_mpi(object):
 
@@ -27,6 +27,7 @@ class fit_routine_mpi(object):
 
         #self.y = {'mpi' self.data['m_pi']**2}
     def __str__(self):
+        output = "Model: "
         return str(self.fit)
         # output = "Model: %s" %(self.model_info)
         # for a_xx in ['a06', 'a09', 'a12', 'a15']:
@@ -77,7 +78,6 @@ class fit_routine_mpi(object):
         if interpolation:
             models = np.append(models,Mpi_interpolate(datatag='mpi', model_info=model_info))
 
-        
         if 'mpi' in model_info['particles']:
             models = np.append(models,Mpi(datatag='mpi', model_info=model_info))
         return models
@@ -103,6 +103,7 @@ class fit_routine_mpi(object):
 
         keys = []
         orders = []
+        new_prior['B'] = prior['B']
         for p in particles:
             for l, value in [('light',self.model_info['order_light']), ('disc', self.model_info['order_disc']),
             ('strange', self.model_info['order_strange']), ('xpt', self.model_info['order_chiral'])]:
@@ -167,7 +168,7 @@ class fit_routine_mpi(object):
                 for o in ['llo', 'lo', 'nlo','n2lo']:
                     output[p][o] = {}
 
-            output['mpi']['lo']['light']    = ['Ba09','Ba12','Ba15','l_3','l_3^a']
+            output['mpi']['lo']['light']    = ['l_3','l_3^a']
             output['mpi']['lo']['disc']     = ['d_{mpi,a}']
             output['mpi']['lo']['xpt']      = []
             output['mpi']['n2lo']['light']  = ['c_{mpi,2F}']
@@ -271,7 +272,6 @@ class Mpi_interpolate(lsqfit.MultiFitterModel):
         #xdata['eps_pi_pp'] = self.phys['eps_pi']
         if self.model_info['mixed_action']:
             xdata['eps_pi_sea_tilde'] = p['eps_pi_sea_tilde']
-        #xdata['lam_chi'] = p['lam_chi']
         if self.model_info['fit_phys_units']:
             xdata['eps_pi'] = p['m_pi'] / p['lam_chi']
         elif self.model_info['fit_fpi_units']:
@@ -292,30 +292,30 @@ class Mpi_interpolate(lsqfit.MultiFitterModel):
         return output
 
     def fitfcn_lo(self, p,xdata,latt_spacing=None):
-        output=0
+        #output=0
         if latt_spacing == 'a06':
-            output += p['Ba06']
+            output = p['Ba06']
         elif latt_spacing == 'a09':
-            output+= p['Ba09']
+            output= p['Ba09']
         elif latt_spacing == 'a12':
-            output += p['Ba12']
+            output = p['Ba12']
         elif latt_spacing == 'a15':
-            output += p['Ba15']
+            output = p['Ba15']
 
-        # else:
-        #     #output = xi['l'] *xi['s'] *0 # returns correct shape
-        #     for j, ens in enumerate(self.ensembles):
-        #         if ens[:3] == 'a06':
-        #             output[j] = p['Ba06']
-        #         elif ens[:3] == 'a09':
-        #             output[j] = p['Ba09']
-        #         elif ens[:3] == 'a12':
-        #             output[j] = p['Ba12']
-        #         elif ens[:3] == 'a15':
-        #             output[j] = p['Ba15']
-        #         else:
-        #             output[j] = 0
-
+        else: 
+            output = xdata['eps_pi'] * xdata['eps_pi'] * 0
+            for j, ens in enumerate(self.ensembles):
+                print(j,ens)
+                if ens[:3] == 'a06':
+                    output[j] = p['Ba06']
+                elif ens[:3] == 'a09':
+                    output[j] = p['Ba09']
+                elif ens[:3] == 'a12':
+                    output[j] = p['Ba12']
+                elif ens[:3] == 'a15':
+                    output[j] = p['Ba15']
+                else:
+                    output[j] = 0
         return output * 2 * p['m_q']
 
 

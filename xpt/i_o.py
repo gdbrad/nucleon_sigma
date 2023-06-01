@@ -50,7 +50,6 @@ class InputOutput(object):
                 data[ens]['alpha_s'] = f[ens]['alpha_s']
                 data[ens]['L'] = f[ens]['L']
                 data[ens]['m_pi'] = f[ens]['mpi'][1:]
-
                 data[ens]['m_k'] = f[ens]['mk'][1:]
                 data[ens]['lam_chi'] = 4 *np.pi *f[ens]['Fpi'][1:]
                 data[ens]['Fpi'] = f[ens]['Fpi'][1:] 
@@ -78,22 +77,6 @@ class InputOutput(object):
         data['a15m350']['m_q']   = ((0.0206 + (9.416 / 10**4))/  gv.gvar('0.1505(10)')) * hbar_c 
         data['a15m400']['m_q']   = ((0.0278 + (9.365 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c
 
-                # data[0]['m_q']   = ((0.00152 + (0.938 / 10**4)) /  gv.gvar('0.08730(70)'))* hbar_c 
-                # data[1]['m_q']   = ((0.00449 + (1.659 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
-                # data[2]['m_q']   = ((0.00951 + (2.694 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
-                # data[3]['m_q']   = ((0.0121 + (2.560 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
-                # data[4]['m_q']   = ((0.0160 + (2.532 / 10**4)) /  gv.gvar('0.08730(70)')) * hbar_c
-                # data[5] ['m_q']  = ((0.00195 + (1.642 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
-                # data[6]['m_q']   = ((0.006   + (4.050 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c
-                # data[7]['m_q']   = ((0.0126   + (7.702 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
-                # data[8]['m_q']   = ((0.0166   + (7.579 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c 
-                # data[9]['m_q']   = ((0.0219   + (7.337 / 10**4)) /  gv.gvar('0.12066(88)')) * hbar_c  
-                # data[10]['m_q'] = ((0.00237 + (2.706 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
-                # data[11]['m_q']   = ((0.00712 + (5.736 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
-                # data[12]['m_q']   = ((0.0158 + (9.563 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c 
-                # data[13]['m_q']   = ((0.0206 + (9.416 / 10**4))/  gv.gvar('0.1505(10)')) * hbar_c 
-                # data[14]['m_q']   = ((0.0278 + (9.365 / 10**4)) /  gv.gvar('0.1505(10)')) * hbar_c
-
         with h5py.File(self.project_path+'/data/hyperon_data.h5', 'r') as f:
             for ens in self.ensembles:
                 for obs in list(f[ens]):
@@ -111,7 +94,6 @@ class InputOutput(object):
                 data[ens]['a2DI'] = f[ens]['a2DI'][1:]
                 data[ens]['eps_pi_sea_tilde'] = (data[ens]['m_pi'] + data[ens]['a2DI']) / data[ens]['lam_chi']
         return data
-
     def get_data(self, scheme=None,units='phys',include_phys=False,ensembles=None):
         bs_data = self._get_bs_data(scheme,units)
         phys_data = self.get_data_phys_point(param='m_proton')
@@ -121,7 +103,7 @@ class InputOutput(object):
         
         dim1_obs = ['m_k','m_pi','eps_pi','lam_chi','m_proton','m_delta','eps_proton','Fpi','eps_pi_sea_tilde','a2DI']
         #fpi = 'Fpi'
-        for ens in ensembles:
+        for ens in self.ensembles:
             
             gv_data[ens] = {}
             for obs in dim1_obs:
@@ -159,8 +141,8 @@ class InputOutput(object):
         #     output[param] = np.array([gv_data[ens][param] for ens in self.ensembles])
         # return output, ensembles
 
-        for param in gv_data[ensembles[0]]:
-            output[param] = np.array([gv_data[ens][param] for ens in ensembles])
+        for param in gv_data[self.ensembles[0]]:
+            output[param] = np.array([gv_data[ens][param] for ens in self.ensembles])
         return output
 
 
@@ -181,12 +163,6 @@ class InputOutput(object):
             'eps_proton' : np.mean(gv.gvar(['938.272081(06)', '939.565413(06)'])) /  (4 *np.pi *gv.gvar('92.07(57)')) ,
             'm_delta' : gv.gvar(1232, 2),
             'eps_delta' : gv.gvar(1232, 2) / (4 *np.pi *gv.gvar('92.07(57)')),
-            # 'm_lambda' : gv.gvar(1115.683, 0.006),
-            # 'm_sigma' : np.mean(gv.gvar(['1189.37(07)', '1192.642(24)', '1197.449(30)'])),
-            # 'm_sigma_st' : np.mean(gv.gvar(['1382.80(35)', '1383.7(1.0)', '1387.2(0.5)'])),
-            # 'm_xi' : np.mean(gv.gvar(['1314.86(20)', '1321.71(07)'])),
-            # 'm_xi_st' : np.mean(gv.gvar(['1531.80(32)', '1535.0(0.6)'])),
-            # 'm_omega' : gv.gvar(1672.45, 0.29)
         }
         if param is not None:
             return data_pp[param]
@@ -229,8 +205,8 @@ class InputOutput(object):
         new_prior = {}
         for key in prior:
             new_prior[key] = prior[key]
-        for key in ['eps_pi']:#,'lam_chi', ]:
-            new_prior[key] = data[key] #/data['lam_chi']
+        for key in ['m_pi', 'm_k', 'lam_chi', 'eps2_a']:
+            new_prior[key] = data[key]
         return new_prior
 
 

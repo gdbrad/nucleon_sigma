@@ -15,8 +15,8 @@ prior['g_{delta,delta}'] = gv.gvar(-2.2,5)
 prior['l4_bar'] = gv.gvar(4.02,4.02)
 
 prior['F0']    = gv.gvar(85,30)
-prior['c_2F'] = gv.gvar(0,20)
-prior['c_1F'] = gv.gvar(0,20)
+prior['c2_F'] = gv.gvar(0,20)
+prior['c1_F'] = gv.gvar(0,20)
 
 prior['d_{fpi,a}']  = gv.gvar(0,4)
 prior['d_{fpi,ll}'] = gv.gvar(0,4)

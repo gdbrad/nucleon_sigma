@@ -4,8 +4,8 @@ import gvar as gv
 import sys
 import os
 # local modules 
-import non_analytic_functions as naf
-from i_o import InputOutput
+# import non_analytic_functions as naf
+from xpt.i_o import InputOutput
 
 class fit_routine(object):
 

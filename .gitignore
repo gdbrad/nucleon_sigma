@@ -1,1 +1,13 @@
-es_plotter/
+data/
+*.pyc
+trash.txt
+walkloud_fv.pdf
+walkloud_hyperons.pdf
+walkloud_su2_hbXPT.pdf
+notebooks/scratch.ipynb
+.gitignore
+notes.pdf
+aux/
+*.png
+.vscode/
+notebooks/.*

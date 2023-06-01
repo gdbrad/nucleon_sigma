@@ -26,9 +26,9 @@ mpl.rcParams['text.usetex'] = True
 
 
 #internal xpt modules
-import fit_routine as fit
-import fpi_fit
-import i_o
+import xpt.fit_routine as fit
+import xpt.fpi_fit
+import xpt.i_o
 
 class fit_analysis(object):
     
@@ -45,8 +45,6 @@ class fit_analysis(object):
         ensembles = sorted(list(set(ens_hyp) & set(ens_in)))
         ensembles.remove('a12m220')
         ensembles.remove('a12m220S')
-        #data,ensembles = i_o.InputOutput.get_data(scheme='w0_imp')
-
         self.ensembles = ensembles
         self.model_info = model_info
         self.data = data
@@ -56,6 +54,7 @@ class fit_analysis(object):
         self._phys_point_data = phys_point_data
         self._fit = {}
         self.fitter = fit.fit_routine(prior=prior,data=data, model_info=model_info)
+        self.fit = self.fitter.fit
         #self.fitter_fpi = fpi_fit.fit_routine(prior=prior,data=data, model_info=model_info_fpi)
 
 
@@ -250,9 +249,12 @@ class fit_analysis(object):
     # Returns names of LECs in prior/posterior
     @property
     def extrapolated_mass(self):
+        return self._extrapolated_mass
+    
+    def _extrapolated_mass(self,particle):
         extrapolated_mass = {}
-        for particle in self.model_info['particles']:
-            extrapolated_mass[particle] = self.fitfcn(p=self.posterior, data=self.phys_point_data, particle=particle)
+        # for particle in self.model_info['particles']:
+        extrapolated_mass[particle] = self.fitfcn(p=self.posterior, data=self.phys_point_data, particle=particle)
         return extrapolated_mass
 
     @property
@@ -377,9 +379,9 @@ class fit_analysis(object):
             xdata['eps_a'] = 0
 
         # if ens is not None:
-        return self.fitfcn(p=posterior, data={}, particle=None)
+        # return self.fitfcn(p=posterior, data={}, particle=None)
         # else:
-        #     extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
+        extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
 
             
         # extrapolated_values[ens_j] = self.fitfcn(p=posterior, data={}, particle=None)
