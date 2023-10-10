@@ -1,0 +1,17 @@
+flavor su(3) realized as global symm of hadron spectrum 
+
+8 parameter, cpt, simply conn lie group 
+
+h_abc is invariant under cyclic permutations i.e. h_abc = h_bca = h_cab
+
+gauge principle generates interactions b/w matter fields through exchance of massless gauge bosons 
+
+lagrangian containing only light flavor quarks in chiral limit, where mu, md, ms -> 0, starting pt. for low-energy QCD. 
+
+global symms in ^ manifest in chirality matrix gamma_5
+
+a chiral (field) var is one under which parity is tranformed into neither orig. var nor its neg. 
+
+trans: x-> -x if x is a vector
+
+w

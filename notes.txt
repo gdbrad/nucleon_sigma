@@ -1,0 +1,22 @@
+light quark mass dependence of hardron masses det. by XPT 
+analytic terms depended on lECS of the chiral Lagrangian
+
+lattice quark masses may be too large for su3 xpt to be valid, 
+perturbative xpt behavior occurs only for mq < ms
+WHY SU3 FLAVOR SYMMETRY EVIDENT IN BARYON PHENOMENOLOGY
+
+1/n_c expansion constrains strucutre of baryon xpt 
+chiral corrections to the chiral lagrangian ?? have to respect spin-flavor structure of 1/nc expansion 
+
+mass relations(function of mq)  project baryon masses onto diff spin-flavor channels 
+
+
+sometimes perturbative qcd is called asymptotic freedom 
+
+operator expansion for mass splittings of octet and decuplet uses quark operators as operator basis, can also use skyrme operator basis. what is diff??
+
+
+can use lo xpt to relate quark masses to pion masses  
+
+in isospin limit of su3, only 2 ind. quark masses, 3 ind. meson masses.
+one can always convert from a quark mass expansion to a meson mass expansion via the gell-mann-okubo relation

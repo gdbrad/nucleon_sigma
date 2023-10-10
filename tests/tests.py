@@ -5,7 +5,7 @@ import os
 import h5py
 
 
-import xpt.fit_routine as fit
+import fit_routine as fit
 import i_o
 
 
@@ -62,8 +62,8 @@ class VerboseFitfcn(object):
     def __str__(self):
         output = ''
         for particle in self.model['particles']:
-            output += '-- ' + particle + '\n'
-            output += self.fitfcn_table(particle)
+            #output += '-- ' + particle + '\n'
+            #output += self.fitfcn_table(particle)
             output += '\n'
             output += str(self.error_budget(particle))
         return output

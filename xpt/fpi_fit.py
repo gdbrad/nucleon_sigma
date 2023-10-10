@@ -132,9 +132,9 @@ class fit_routine(object):
             output['Fpi']['lo']['light']    = ['F0','l4_bar']
             output['Fpi']['lo']['disc']     = ['d_{fpi,a}']
             output['Fpi']['lo']['xpt']      = ['F0','l4_bar']
-            output['Fpi']['n2lo']['light']  = ['F0','d_{fpi,ll}','c_2F']
+            output['Fpi']['n2lo']['light']  = ['F0','d_{fpi,ll}','c2_F']
             output['Fpi']['n2lo']['disc']   = ['d_{fpi,aa}','d_{fpi,al}']
-            output['Fpi']['n2lo']['xpt']    = ['c_1F','l4_bar']
+            output['Fpi']['n2lo']['xpt']    = ['c1_F','l4_bar']
 
             if lec_type in output[particle][order]:
                 return output[particle][order][lec_type]
@@ -145,7 +145,6 @@ class Fpi(lsqfit.MultiFitterModel):
     def __init__(self, datatag, model_info):
         super(Fpi, self).__init__(datatag)
         self.model_info = model_info
-        self.phys = InputOutput().get_data_phys_point()
     
     def fitfcn(self, p,xdata=None):
         xdata = {}
@@ -194,7 +193,7 @@ class Fpi(lsqfit.MultiFitterModel):
     def fitfcn_n2lo_xpt(self,p,xdata):
         output = 0
         if self.model_info['order_chiral'] in ['n2lo']:
-            output += p['F0']* (5/4*(xdata['eps_pi']**4*np.log(xdata['eps_pi']**2)**2 +(p['c_1F'] + 2)*np.log(xdata['eps_pi']**2) ))
+            output += p['F0']* (5/4*(xdata['eps_pi']**4*np.log(xdata['eps_pi']**2)**2 +(p['c1_F'] + 2)*np.log(xdata['eps_pi']**2) ))
             #output += p['F0']* (np.log(xdata['eps_pi']**2)**2 +(p['c_1F'] + 2)*np.log(xdata['eps_pi']**2) )
              
         return output
@@ -202,7 +201,7 @@ class Fpi(lsqfit.MultiFitterModel):
     def fitfcn_n2lo(self,p,xdata):
         output = 0
         if self.model_info['order_light'] in ['n2lo']:
-            output += xdata['eps_pi']**4*(p['c_2F']-2*p['l4_bar'])
+            output += xdata['eps_pi']**4*(p['c2_F']-2*p['l4_bar'])
 
         if self.model_info['order_disc'] in ['n2lo']:
             output += p['F0']*( 
